@@ -2,10 +2,14 @@ declare class SpeechRecognition extends EventTarget {
   continuous: boolean
   interimResults: boolean
   lang: string
+  maxAlternatives: number
+  grammars: any
   start(): void
   stop(): void
   onresult: (event: SpeechRecognitionEvent) => void
   onerror: (event: SpeechRecognitionErrorEvent) => void
+  onstart: () => void
+  onend: () => void
 }
 
 interface SpeechRecognitionEvent {
