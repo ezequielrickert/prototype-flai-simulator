@@ -1,47 +1,114 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { ElevenLabs } from '@elevenlabs/elevenlabs-js'
 
-export async function POST(request: NextRequest) {
-  try {
-    const { message, scenario, conversationHistory } = await request.json()
+// Inicializar ElevenLabs con la API key
+const elevenlabs = new ElevenLabs({
+  apiKey: process.env.ELEVENLABS_API_KEY || 'YOUR_API_KEY',
+})
 
-    if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 })
-    }
+// Cache para almacenar agentes por sesión
+const agentCache = new Map<string, string>()
 
-    const systemPrompt = `Eres un asistente de capacitación ética especializado en anti-corrupción. 
-    
+// Función para crear un agente si no existe
+async function getOrCreateAgent(sessionId: string, scenario: any): Promise<string> {
+  // Verificar si ya existe un agente para esta sesión
+  if (agentCache.has(sessionId)) {
+    return agentCache.get(sessionId)!
+  }
+
+  // Crear el prompt del sistema personalizado para el agente
+  const systemPrompt = `Eres un asistente de capacitación ética especializado en anti-corrupción con acento argentino.
+
 Contexto del escenario: ${scenario.title} - ${scenario.description}
 
-Tu rol:
-- Eres un entrenador experto en ética empresarial con acento argentino
+Tu rol y personalidad:
+- Eres un entrenador experto en ética empresarial con acento y modismos argentinos
 - Haces preguntas reflexivas para guiar al usuario hacia decisiones éticas
 - Proporcionas feedback constructivo sin ser condescendiente
 - Usas ejemplos prácticos y situaciones reales
 - Mantienes un tono profesional pero cercano, típico argentino
 - Cada respuesta debe ser conversacional, como si fuera una charla telefónica
 - Limita tus respuestas a 2-3 oraciones para mantener el flujo natural
+- Usa expresiones como "mirá", "está bueno", "bárbaro", "che", etc.
 
-Historial de conversación:
-${conversationHistory.map((msg: any) => `${msg.speaker === "user" ? "Usuario" : "IA"}: ${msg.text}`).join("\n")}
+Responde de manera natural y conversacional, guiando al usuario hacia reflexiones éticas profundas.`
 
-Responde de manera natural y conversacional al siguiente mensaje del usuario.`
+  // Crear el agente conversacional
+  const agent = await elevenlabs.conversationalAi.agents.create({
+    conversationConfig: {
+      agent: {
+        prompt: {
+          prompt: systemPrompt,
+          tools: [
+            {
+              type: 'system',
+              name: 'end_call',
+              description: 'Termina la conversación cuando el usuario haya completado su reflexión ética',
+            }
+          ],
+        },
+        // Configuración de voz para que suene argentino/latino
+        voice: {
+          voiceId: "pNInz6obpgDQGcFmaJgB", // Adam voice - puedes cambiar por una voz más apropiada
+        },
+        // Variables dinámicas para personalización
+        dynamicVariables: [
+          {
+            name: "scenario_title",
+            value: scenario.title
+          },
+          {
+            name: "scenario_description",
+            value: scenario.description
+          }
+        ],
+      },
+    },
+  })
 
-    const { text } = await generateText({
-      model: openai("gpt-4o-mini"),
-      prompt: `${systemPrompt}\n\nUsuario: ${message}`,
-      maxTokens: 150, // Limitar para respuestas concisas
-      temperature: 0.7, // Balance entre creatividad y consistencia
+  // Guardar el agente en el cache
+  agentCache.set(sessionId, agent.agentId)
+
+  // Limpiar el cache después de 1 hora para evitar acumulación
+  setTimeout(() => {
+    agentCache.delete(sessionId)
+  }, 3600000) // 1 hora
+
+  return agent.agentId
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { message, scenario, conversationHistory, sessionId } = await request.json()
+
+    if (!message) {
+      return NextResponse.json({ error: "Message is required" }, { status: 400 })
+    }
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID is required" }, { status: 400 })
+    }
+
+    // Obtener o crear el agente para esta sesión
+    const agentId = await getOrCreateAgent(sessionId, scenario)
+
+    // Generar respuesta del agente
+    const response = await elevenlabs.conversationalAi.agents.chat({
+      agentId: agentId,
+      message: message,
     })
 
     return NextResponse.json({
       success: true,
-      response: text.trim(),
+      response: response.text || response.message,
+      agentId: agentId,
+      sessionId: sessionId,
     })
-  } catch (error) {
-    console.error("Chat API error:", error)
 
+  } catch (error) {
+    console.error("ElevenLabs Chat API error:", error)
+
+    // Respuestas de fallback en caso de error
     const fallbackResponses = [
       "Mirá, esa es una perspectiva interesante. ¿Me podrías contar un poco más sobre por qué pensás que esa sería la mejor opción?",
       "Está bueno lo que decís. Ahora, ¿cómo te asegurarías de que tu decisión esté alineada con los valores de la empresa?",
@@ -59,3 +126,4 @@ Responde de manera natural y conversacional al siguiente mensaje del usuario.`
     })
   }
 }
+
