@@ -1,10 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ElevenLabsChatbot } from "@/components/elevenlabs-chatbot";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+interface ElevenLabsConfig {
+  hasApiKey: boolean
+  hasAgentId: boolean
+  agentId: string
+  status: string
+}
+
 export default function ElevenLabsDemo() {
+  const [config, setConfig] = useState<ElevenLabsConfig | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Fetch ElevenLabs configuration
+    fetch('/api/elevenlabs-config')
+      .then(res => res.json())
+      .then(data => {
+        setConfig(data)
+        setIsLoading(false)
+      })
+      .catch(error => {
+        console.error('Failed to load configuration:', error)
+        setIsLoading(false)
+      })
+  }, [])
+
   const demoScenario = {
     title: "Decisión sobre Soborno Empresarial",
     description: "Un cliente importante está ofreciendo un contrato millonario a cambio de ciertos 'favores' que podrían comprometer la integridad de tu empresa."
@@ -114,14 +139,28 @@ export default function ElevenLabsDemo() {
             <CardContent className="space-y-2">
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p><strong>API Key:</strong> Configured ✅</p>
-                  <p><strong>Agent ID:</strong> {process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || ''}</p>
+                  <p><strong>API Key:</strong> {isLoading ? 'Loading...' : config?.hasApiKey ? 'Configured ✅' : 'Not configured ❌'}</p>
+                  <p><strong>Agent ID:</strong> {isLoading ? 'Loading...' : config?.agentId || 'Not configured'}</p>
                 </div>
                 <div>
                   <p><strong>Voice Recognition:</strong> Browser-based</p>
                   <p><strong>Speech Language:</strong> Spanish (Argentina)</p>
                 </div>
               </div>
+              {config?.status === 'missing_credentials' && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-yellow-800 text-sm">
+                    ⚠️ ElevenLabs credentials missing. Please check your .env file.
+                  </p>
+                </div>
+              )}
+              {config?.status === 'configured' && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-green-800 text-sm">
+                    ✅ ElevenLabs integration is properly configured.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

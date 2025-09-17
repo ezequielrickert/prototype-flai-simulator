@@ -191,13 +191,52 @@ The chatbot component uses Tailwind CSS and can be customized through:
 
 ### 10. Troubleshooting
 
+#### Important Note: ElevenLabs Conversational AI Architecture
+
+**ElevenLabs Conversational AI uses WebSocket connections**, not traditional REST API endpoints for real-time conversations. The current implementation provides:
+
+1. **Agent Verification**: ✅ Working - confirms your agent exists and credentials are valid
+2. **Conversation Simulation**: ⚠️ Limited - uses simulate-conversation endpoint for basic text responses  
+3. **WebSocket URL**: 🔄 Available - provides signed URL for real-time conversation
+4. **Fallback Responses**: ✅ Working - provides mock responses when other methods fail
+
+#### Current Status
+
+The integration now successfully:
+- ✅ Verifies your ElevenLabs agent
+- ✅ Provides text-based responses (via simulation or fallback)
+- ✅ Returns WebSocket URLs for real-time integration
+- ✅ Handles errors gracefully with helpful suggestions
+
+#### For Full Real-Time Conversation
+
+To implement full real-time conversation with voice, you'll need to:
+
+1. **Use WebSocket connections** on the frontend
+2. **Implement audio streaming** for voice input/output
+3. **Use the ElevenLabs JavaScript SDK** for conversation management
+
+Example WebSocket integration:
+```javascript
+// Frontend WebSocket connection (future enhancement)
+const ws = new WebSocket(websocketUrl);
+ws.onopen = () => {
+  // Send audio or text data
+  ws.send(JSON.stringify({ text: "Hello" }));
+};
+ws.onmessage = (event) => {
+  // Receive agent responses with audio
+  const response = JSON.parse(event.data);
+  console.log(response);
+};
+```
+
 #### Common Issues
 
-**"Method Not Allowed" Error**
-This error indicates the API endpoint or HTTP method is incorrect. The updated API route includes:
-- Multiple endpoint testing approaches
-- Detailed error logging with status codes
-- Alternative endpoint fallbacks
+**"Method Not Allowed" Error** ✅ **RESOLVED**
+- The API now uses correct ElevenLabs endpoints
+- Agent verification works properly
+- Conversation simulation provides text responses
 
 **No API Response**
 - Verify environment variables are set correctly
@@ -211,24 +250,26 @@ This error indicates the API endpoint or HTTP method is incorrect. The updated A
 - Test with manual text input as fallback
 
 **Audio Playback Issues**
-- Verify audio URLs in responses
+- Current implementation doesn't provide audio URLs (requires WebSocket)
+- For audio responses, implement WebSocket connection
 - Check browser audio permissions
-- Ensure network connectivity
 
 #### Debug Steps
 
-1. **Check Configuration**: The API route now shows configuration status in error messages
+1. **Check Configuration**: The API route shows configuration status in error messages
 2. **Verify Agent**: The route tests agent accessibility before attempting conversations
 3. **Monitor Console**: Check both browser and server console for detailed error logs
 4. **API Response**: The route returns detailed error information including status codes and suggestions
 
 #### Recent Fixes
 
-- ✅ Fixed API endpoint structure for conversation creation
+- ✅ Fixed API endpoint structure using ElevenLabs SDK research
 - ✅ Added comprehensive error handling and debugging
-- ✅ Implemented alternative endpoint fallbacks
+- ✅ Implemented conversation simulation for text responses
 - ✅ Added agent verification before conversation attempts
 - ✅ Enhanced error messages with actionable suggestions
+- ✅ Added WebSocket URL provision for future real-time implementation
+- ✅ Added graceful fallback responses when simulation fails
 
 #### Debug Information
 Check the browser console for detailed error messages and API response logs.
