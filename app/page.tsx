@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -75,6 +76,12 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Link href="/elevenlabs-demo">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  AI Assistant
+                </Button>
+              </Link>
               <Badge
                 variant="secondary"
                 className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
@@ -260,7 +267,7 @@ export default function HomePage() {
                         {item.topic}
                       </span>
                     </div>
-                    <Badge variant="outline" size="sm">
+                    <Badge variant="outline" className="text-xs">
                       Nivel {item.level}
                     </Badge>
                   </div>
