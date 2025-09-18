@@ -76,7 +76,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/elevenlabs-demo">
+              <Link href="/openai-demo">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <MessageCircle className="w-4 h-4" />
                   AI Assistant

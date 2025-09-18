@@ -2,26 +2,43 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    // For demo purposes, return predefined voices
-    // In production, this would fetch from ElevenLabs API
+    // Return OpenAI TTS voices
     const voices = [
       {
-        voice_id: "pNInz6obpgDQGcFmaJgB",
-        name: "Adam",
+        voice_id: "alloy",
+        name: "Alloy",
         category: "premade",
-        description: "Voz masculina profesional",
+        description: "Voz neutral equilibrada",
       },
       {
-        voice_id: "yoZ06aMxZJJ28mfd3POQ",
-        name: "Sam",
-        category: "premade",
-        description: "Voz masculina joven",
+        voice_id: "echo",
+        name: "Echo",
+        category: "premade", 
+        description: "Voz masculina clara",
       },
       {
-        voice_id: "AZnzlk1XvdvUeBnXmlld",
-        name: "Domi",
+        voice_id: "fable",
+        name: "Fable",
         category: "premade",
-        description: "Voz femenina confiable",
+        description: "Voz masculina británica",
+      },
+      {
+        voice_id: "onyx",
+        name: "Onyx",
+        category: "premade",
+        description: "Voz masculina profunda",
+      },
+      {
+        voice_id: "nova",
+        name: "Nova",
+        category: "premade",
+        description: "Voz femenina joven",
+      },
+      {
+        voice_id: "shimmer",
+        name: "Shimmer", 
+        category: "premade",
+        description: "Voz femenina suave",
       },
     ]
 
