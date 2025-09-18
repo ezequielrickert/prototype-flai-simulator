@@ -61,37 +61,28 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
+      <header className="header border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-xl flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-white" />
+              <div className="rounded-2xl p-1 flex items-center justify-center" style={{background: '#181716', boxShadow: '0 0 16px 4px rgba(212,175,55,0.25)'}}>
+                <img src="/logo-integridai.png" alt="IntegridAI Logo" className="w-16 h-16 object-contain" style={{display: 'block'}} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">EthicsAI</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Capacitación Anti-Corrupción</p>
+                <h1 className="text-xl font-bold text-black">IntegridAI</h1>
+                <p className="text-sm muted">Capacitación Anti-Corrupción</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/openai-demo">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  AI Assistant
-                </Button>
-              </Link>
-              <Badge
-                variant="secondary"
-                className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-              >
-                <Trophy className="w-4 h-4 mr-1" />
+              <Badge className="badge flex items-center gap-2 text-lg px-4 py-2">
+                <Trophy className="w-12 h-12 icon-gold mr-2" />
                 Nivel {userProgress.level}
               </Badge>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                {userProgress.xp} XP
-              </Badge>
+                <Badge className="xp-counter flex items-center gap-2 text-lg px-4 py-2">
+                    {userProgress.xp} XP
+                </Badge>
             </div>
           </div>
         </div>
@@ -224,18 +215,18 @@ export default function HomePage() {
             </Card>
 
             {/* Streak Counter */}
-            <Card>
+            <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-orange-500" />
+                <CardTitle className="text-lg text-gold flex items-center gap-2">
+                    <Trophy className="w-5 h-5 icon-gold" />
                   Racha Actual
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-2">
-                <div className="text-4xl font-bold text-orange-500">{userProgress.currentStreak}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">días consecutivos</p>
+                <div className="text-4xl font-bold text-gold">{userProgress.currentStreak}</div>
+                <p className="text-sm muted">días consecutivos</p>
                 <div className="pt-2">
-                  <Badge variant="outline" className="border-orange-300 text-orange-700">
+                  <Badge variant="outline" className="border-gold text-gold">
                     {userProgress.totalDays} días totales
                   </Badge>
                 </div>
@@ -243,9 +234,9 @@ export default function HomePage() {
             </Card>
 
             {/* Upcoming Topics */}
-            <Card>
+              <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Próximos Temas</CardTitle>
+                  <CardTitle className="text-lg text-gold">Próximos Temas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -255,19 +246,19 @@ export default function HomePage() {
                 ].map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    className="flex items-center justify-between p-3 panel rounded-lg"
                   >
                     <div className="flex items-center gap-3">
                       {item.locked ? (
-                        <Lock className="w-4 h-4 text-gray-400" />
+                          <Lock className="w-4 h-4 muted" />
                       ) : (
-                        <div className="w-4 h-4 bg-green-500 rounded-full" />
+                          <div className="w-4 h-4 icon-gold rounded-full" />
                       )}
-                      <span className={`text-sm ${item.locked ? "text-gray-400" : "text-gray-700 dark:text-gray-300"}`}>
+                        <span className={`text-sm ${item.locked ? "muted" : "text-gold"}`}>
                         {item.topic}
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-gold text-gold">
                       Nivel {item.level}
                     </Badge>
                   </div>

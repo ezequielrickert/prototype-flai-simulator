@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.12 0.02 60); /* negro profundo */
+  --background: #181716; /* negro profundo */
   --foreground: oklch(0.98 0.01 80); /* blanco cálido */
   --card: linear-gradient(180deg, oklch(0.75 0.18 80) 70%, oklch(0.12 0.02 60) 100%); /* dorado a negro */
   --card-foreground: oklch(0.98 0.01 80);
@@ -42,7 +42,7 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.02 60);
+  --background: #181716;
   --foreground: oklch(0.98 0.01 80);
   --card: linear-gradient(180deg, oklch(0.75 0.18 80) 70%, oklch(0.12 0.02 60) 100%);
   --card-foreground: oklch(0.98 0.01 80);
@@ -125,5 +125,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .card-custom {
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 2px solid white;
+    box-shadow: 0 8px 32px 0 rgba(255,255,255,0.8);
+    border-radius: var(--radius);
   }
 }
