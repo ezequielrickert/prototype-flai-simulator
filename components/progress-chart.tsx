@@ -3,20 +3,31 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
 
 const progressData = [
-  { day: "L", score: 85, completed: true },
-  { day: "M", score: 92, completed: true },
-  { day: "X", score: 78, completed: true },
-  { day: "J", score: 88, completed: true },
-  { day: "V", score: 95, completed: true },
-  { day: "S", score: 82, completed: true },
-  { day: "D", score: 0, completed: false },
+  { day: "Dom", score: 60, completed: true },
+  { day: "Lun", score: 85, completed: true },
+  { day: "Mar", score: 92, completed: true },
+  { day: "Mie", score: 78, completed: true },
+  { day: "Jue", score: 88, completed: true },
+  { day: "Vie", score: null, completed: false },
+  { day: "Sab", score: null, completed: false },
 ]
 
+const dayNames: Record<string, string> = {
+    Lun: "Lunes",
+    Mar: "Martes",
+    Mie: "Miércoles",
+    Jue: "Jueves",
+    Vie: "Viernes",
+    Sab: "Sábado",
+    Dom: "Domingo",
+    return: "",
+}
+
 const weeklyData = [
-  { week: "Sem 1", avg: 82 },
-  { week: "Sem 2", avg: 87 },
-  { week: "Sem 3", avg: 91 },
-  { week: "Sem 4", avg: 89 },
+  { week: "Sem 1", avg: 74 },
+  { week: "Sem 2", avg: 80 },
+  { week: "Sem 3", avg: 85 },
+  { week: "Sem 4", avg: 95 },
 ]
 
 export function ProgressChart() {
@@ -32,7 +43,7 @@ export function ProgressChart() {
             <YAxis domain={[0, 100]} />
             <Tooltip
               formatter={(value: number, name: string) => [`${value}%`, name === "score" ? "Puntuación" : name]}
-              labelFormatter={(label) => `Día: ${label}`}
+              labelFormatter={(label) => `Día: ${dayNames[label] || label}`}
               cursor={{ fill: "rgba(0,0,0,0)" }}
               contentStyle={{ background: "#181716", color: "#FAF0E6", border: "none", borderRadius: "0.75rem", boxShadow: "0 2px 8px 0 rgba(40,30,10,0.18)" }}
             />
