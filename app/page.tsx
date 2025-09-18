@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import {Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay} from "lucide-react"
+import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User } from "lucide-react"
 import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
 
@@ -70,18 +70,18 @@ export default function HomePage() {
                 <img src="/logo-integridai.png" alt="IntegridAI Logo" className="w-16 h-16 object-contain" style={{display: 'block'}} />
               </div>
               <div>
-                <h1 className="text-xl font-bold muted">IntegridAI</h1>
-                <p className="text-sm muted">Capacitación Anti-Corrupción</p>
+                <h1 className="header-title-dark">IntegridAI</h1>
+                <p className="header-subtitle-dark">Capacitación Anti-Corrupción</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Badge className="badge flex items-center gap-2 text-lg px-4 py-2">
-                <Trophy className="w-12 h-12 icon-gold mr-2" />
+              <Badge className="badge-header-nivel flex items-center gap-2 text-lg px-4 py-2">
+                <Trophy className="w-8 h-8 icon-gold mr-2" />
                 Nivel {userProgress.level}
               </Badge>
-                <Badge className="xp-counter flex items-center gap-2 text-lg px-4 py-2">
-                    {userProgress.xp} XP
-                </Badge>
+              <a href="/perfil" title="Ver perfil">
+                <User className="w-10 h-10 perfil-icon" />
+              </a>
             </div>
           </div>
         </div>
@@ -96,25 +96,25 @@ export default function HomePage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: 'var(--blue-main)'}}>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: 'var(--brown-dark)'}}>
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="card-title-gold flex items-center gap-2">
                         Desafío Diario
                       </CardTitle>
                       <CardDescription>Conversación con IA - 5 minutos</CardDescription>
                     </div>
                   </div>
                   {userProgress.completedToday ? (
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <span className="chip">
                       <CheckCircle2 className="w-4 h-4 mr-1" />
                       Completado
-                    </Badge>
+                    </span>
                   ) : (
-                    <Badge variant="outline" className="border-gold text-gold">
+                    <span className="chip border-gold text-gold">
                       Pendiente
-                    </Badge>
+                    </span>
                   )}
                 </div>
               </CardHeader>
@@ -132,7 +132,7 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="p-4 card-brown-bg rounded-lg">
                     <h4 className="font-semibold mb-2" style={{color: 'var(--cream)'}}>
                       Tema de Hoy: Conflictos de Interés
                     </h4>
@@ -166,7 +166,7 @@ export default function HomePage() {
             {/* Progress Chart */}
             <Card className="card-custom">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="card-title-gold flex items-center gap-2">
                   <Target className="w-5 h-5 icon-gold" />
                   Tu Progreso
                 </CardTitle>
@@ -183,22 +183,24 @@ export default function HomePage() {
             {/* Level Progress */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="card-title-gold flex items-center gap-2">
                   <TvMinimalPlay className="w-5 h-5 icon-gold" />
                   Progreso de Nivel
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Nivel {userProgress.level}</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {xpToNextLevel} XP para siguiente nivel
+              <CardContent className="text-center space-y-2">
+                <div className="text-4xl font-bold streak-number">{userProgress.level}</div>
+                <div className="separator" />
+                <p className="text-sm muted">Nivel actual</p>
+                <div className="pt-2">
+                  <span className="chip">
+                    {userProgress.xp} XP
                   </span>
                 </div>
-                <Progress value={progressToNextLevel} className="h-3" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold" style={{color: 'var(--trend-green)'}}>{userProgress.xp}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Puntos de Experiencia</p>
+                <div className="pt-2">
+                  <span className="chip">
+                    {xpToNextLevel} XP para siguiente nivel
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -206,18 +208,19 @@ export default function HomePage() {
             {/* Streak Counter */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="card-title-gold flex items-center gap-2">
                   <Trophy className="w-5 h-5 icon-gold" />
                   Racha Actual
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-2">
-                <div className="text-4xl font-bold" style={{color: 'var(--trend-green)'}}>{userProgress.currentStreak}</div>
+                <div className="text-4xl font-bold streak-number">{userProgress.currentStreak}</div>
+                <div className="separator" />
                 <p className="text-sm muted">días consecutivos</p>
                 <div className="pt-2">
-                  <Badge variant="outline" className="border-gold text-gold">
+                  <span className="chip">
                     {userProgress.totalDays} días totales
-                  </Badge>
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -225,7 +228,7 @@ export default function HomePage() {
             {/* Upcoming Topics */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="card-title-gold flex items-center gap-2">
                   <Lock className="w-5 h-5 icon-gold" />
                   Próximos Temas
                 </CardTitle>

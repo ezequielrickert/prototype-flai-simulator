@@ -6,7 +6,8 @@
   /* Colores principales */
   --gold: #D4AF37;
   --gold-dark: #B8860B;
-  --brown-dark: #8B4513;
+  --brown-dark-20: rgba(139, 69, 19, 0.2);
+  --brown-dark: rgba(139, 69, 19);
   --brown: #A0522D;
   --black: #181716;
   --gray-dark: #2C2C2C;
@@ -54,6 +55,9 @@
   body {
     background: var(--background);
     color: var(--foreground);
+    /* Fondo con textura geométrica sutil */
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="40" height="40" fill="%23FAF0E6" fill-opacity="0.03"/><path d="M0 0L40 40M40 0L0 40" stroke="%23D4AF37" stroke-opacity="0.04" stroke-width="1"/></svg>');
+    background-size: 40px 40px;
   }
   .header {
     position: relative;
@@ -216,4 +220,75 @@
     margin-right: 0.5em;
     border: 2px solid var(--brown-dark);
   }
+
+  /* --- Personalizaciones solicitadas por el usuario --- */
+
+  .header-title-dark {
+    color: var(--black);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 2.1rem;
+    text-shadow: 0 1px 8px #2C2C2C22;
+  }
+
+  .header-subtitle-dark {
+    color: var(--black);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    font-size: 1.2rem;
+    text-shadow: 0 1px 8px #2C2C2C22;
+  }
+
+  .badge-header-nivel {
+    background: var(--gray-dark);
+    color: var(--gold);
+    border-radius: 1.5em;
+    border: 2px solid var(--gold);
+    font-weight: bold;
+    font-size: 1.05em;
+    padding: 0.35em 1.1em;
+    box-shadow: 0 2px 8px 0 rgba(212,175,55,0.10);
+  }
+
+  .chip {
+    padding: 0.35em 1.2em;
+    border-radius: 1em;
+    font-weight: 600;
+    font-size: 1em;
+    background: var(--beige);
+    color: var(--brown-dark);
+    box-shadow: 0 1px 4px 0 rgba(212,175,55,0.08);
+    border: 1px solid #D4AF37;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .card-title-gold {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.2em;
+  }
+
+  .card-brown-bg {
+    background: var(--brown-dark-20);
+    color: var(--cream);
+  }
+
+  .perfil-icon {
+    color: var(--gold);
+    background: var(--cream);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px 0 rgba(212,175,55,0.18);
+    padding: 0.3em;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .perfil-icon:hover {
+    box-shadow: 0 0 16px 2px #D4AF37aa;
+  }
+
+  /* --- Fin de personalizaciones --- */
 }
