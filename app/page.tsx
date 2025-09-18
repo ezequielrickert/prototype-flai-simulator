@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock } from "lucide-react"
+import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Mic } from "lucide-react"
 import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
+import { RealtimeChatInterface } from "@/components/realtime-chat-interface"
 
 interface UserProgress {
   currentStreak: number
@@ -30,6 +31,7 @@ export default function HomePage() {
   })
 
   const [showQuiz, setShowQuiz] = useState(false)
+  const [showRealtimeChat, setShowRealtimeChat] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -39,6 +41,10 @@ export default function HomePage() {
 
   const handleStartQuiz = () => {
     setShowQuiz(true)
+  }
+
+  const handleStartRealtimeChat = () => {
+    setShowRealtimeChat(true)
   }
 
   const handleQuizComplete = (score: number) => {
@@ -60,6 +66,31 @@ export default function HomePage() {
     return <DailyQuiz onComplete={handleQuizComplete} level={userProgress.level} />
   }
 
+  if (showRealtimeChat) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 text-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowRealtimeChat(false)}
+              className="mb-4"
+            >
+              ← Back to Home
+            </Button>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              OpenAI Real-time Voice Chat
+            </h1>
+            <p className="text-gray-600">
+              Experience real-time voice conversation with AI using WebRTC
+            </p>
+          </div>
+          <RealtimeChatInterface />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
@@ -76,12 +107,15 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/openai-demo">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  AI Assistant
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={handleStartRealtimeChat}
+              >
+                <Mic className="w-4 h-4" />
+                Voice Chat
+              </Button>
               <Badge
                 variant="secondary"
                 className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
@@ -101,6 +135,48 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Real-time Chat Card */}
+            <Card className="border-2 border-green-200 dark:border-green-800 shadow-lg">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                      <Mic className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">Real-time Voice Chat</CardTitle>
+                      <CardDescription>OpenAI Realtime API - Nueva tecnología</CardDescription>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <Volume2 className="w-4 h-4 mr-1" />
+                    Nuevo
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      ✨ Conversación de Voz en Tiempo Real
+                    </h4>
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                      Experimenta la nueva tecnología de OpenAI Realtime API. Habla directamente con la IA usando 
+                      WebRTC para una comunicación instantánea y natural.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleStartRealtimeChat}
+                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                  >
+                    <Mic className="w-5 h-5 mr-2" />
+                    Iniciar Chat de Voz
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Daily Challenge Card */}
             <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg">
               <CardHeader className="pb-4">
@@ -153,21 +229,10 @@ export default function HomePage() {
                   <Button
                     onClick={handleStartQuiz}
                     disabled={userProgress.completedToday}
+                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105"
                     style={{
                       backgroundColor: userProgress.completedToday ? "#6b7280" : "#1d4ed8",
                       color: "#ffffff",
-                      border: "none",
-                    }}
-                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105"
-                    onMouseEnter={(e) => {
-                      if (!userProgress.completedToday) {
-                        e.currentTarget.style.backgroundColor = "#1e40af"
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!userProgress.completedToday) {
-                        e.currentTarget.style.backgroundColor = "#1d4ed8"
-                      }
                     }}
                   >
                     {userProgress.completedToday ? (
@@ -191,9 +256,8 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5" />
-                  Tu Progreso
+                  Progreso de Aprendizaje
                 </CardTitle>
-                <CardDescription>Seguimiento de tu desarrollo en los últimos 30 días</CardDescription>
               </CardHeader>
               <CardContent>
                 <ProgressChart />
@@ -203,75 +267,76 @@ export default function HomePage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Level Progress */}
+            {/* Stats Card */}
             <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Progreso de Nivel</CardTitle>
+              <CardHeader>
+                <CardTitle className="text-lg">Estadísticas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Nivel {userProgress.level}</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {xpToNextLevel} XP para siguiente nivel
-                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Racha actual</span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-orange-600">{userProgress.currentStreak}</span>
+                    <span className="text-sm text-gray-500">días</span>
+                  </div>
                 </div>
-                <Progress value={progressToNextLevel} className="h-3" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userProgress.xp}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Puntos de Experiencia</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Total días</span>
+                  <span className="font-bold">{userProgress.totalDays}</span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Streak Counter */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-orange-500" />
-                  Racha Actual
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center space-y-2">
-                <div className="text-4xl font-bold text-orange-500">{userProgress.currentStreak}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">días consecutivos</p>
-                <div className="pt-2">
-                  <Badge variant="outline" className="border-orange-300 text-orange-700">
-                    {userProgress.totalDays} días totales
-                  </Badge>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Nivel {userProgress.level}</span>
+                    <span className="text-sm text-gray-500">{xpToNextLevel} XP restantes</span>
+                  </div>
+                  <Progress value={progressToNextLevel} className="h-2" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Upcoming Topics */}
+            {/* Weekly Goals */}
             <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Próximos Temas</CardTitle>
+              <CardHeader>
+                <CardTitle className="text-lg">Objetivos Semanales</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {[
-                  { topic: "Transparencia Financiera", level: 4, locked: false },
-                  { topic: "Denuncias Éticas", level: 5, locked: true },
-                  { topic: "Liderazgo Íntegro", level: 6, locked: true },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.locked ? (
-                        <Lock className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <div className="w-4 h-4 bg-green-500 rounded-full" />
-                      )}
-                      <span className={`text-sm ${item.locked ? "text-gray-400" : "text-gray-700 dark:text-gray-300"}`}>
-                        {item.topic}
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      Nivel {item.level}
-                    </Badge>
-                  </div>
-                ))}
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                  <span className="text-sm">5 días de práctica</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                  <span className="text-sm">2 escenarios completados</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
+                  <span className="text-sm text-gray-500">Quiz final semanal</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/scenarios">
+                    <Target className="w-4 h-4 mr-2" />
+                    Ver Escenarios
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={handleStartRealtimeChat}>
+                  <Mic className="w-4 h-4 mr-2" />
+                  Chat de Voz
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/progress">
+                    <Trophy className="w-4 h-4 mr-2" />
+                    Mi Progreso
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </div>

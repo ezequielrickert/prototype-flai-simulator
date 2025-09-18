@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { OpenAIChatbot } from '@/components/openai-chatbot';
+import { RealtimeChatInterface } from '@/components/realtime-chat-interface';
 
 export default function OpenAIDemo() {
   const scenario = {
@@ -15,15 +15,15 @@ export default function OpenAIDemo() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">OpenAI Integration Demo</h1>
+          <h1 className="text-4xl font-bold mb-4">OpenAI Realtime Demo</h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Experimenta conversaciones con IA usando GPT-4 de OpenAI y síntesis de voz optimizada para español latinoamericano
+            Experimenta conversaciones en tiempo real con IA usando la nueva API Realtime de OpenAI con audio streaming directo
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            <Badge variant="secondary">OpenAI GPT-4</Badge>
-            <Badge variant="secondary">Text-to-Speech</Badge>
-            <Badge variant="secondary">Ethics Training</Badge>
-            <Badge variant="secondary">Real-time Chat</Badge>
+            <Badge variant="secondary">OpenAI Realtime API</Badge>
+            <Badge variant="secondary">WebRTC Audio</Badge>
+            <Badge variant="secondary">Real-time Voice</Badge>
+            <Badge variant="secondary">gpt-4o-realtime-preview</Badge>
           </div>
         </div>
 
@@ -31,22 +31,22 @@ export default function OpenAIDemo() {
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">🎙️ Voice Input</CardTitle>
+              <CardTitle className="text-lg">🎙️ Real-time Voice</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Usa reconocimiento de voz para comunicarte naturalmente con el asistente de IA
+                Comunicación de voz bidireccional en tiempo real sin latencia usando WebRTC
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">🔊 Audio Responses</CardTitle>
+              <CardTitle className="text-lg">🔊 Streaming Audio</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Recibe respuestas de IA con síntesis de voz natural optimizada para español latinoamericano
+                Audio streaming directo desde la API Realtime de OpenAI sin procesamiento intermedio
               </p>
             </CardContent>
           </Card>
@@ -57,7 +57,7 @@ export default function OpenAIDemo() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Impulsado por GPT-4 de OpenAI para respuestas inteligentes y contextualmente apropiadas
+                Impulsado por gpt-4o-realtime-preview para conversaciones naturales e interruptibles
               </p>
             </CardContent>
           </Card>
@@ -65,7 +65,7 @@ export default function OpenAIDemo() {
 
         {/* Main Chat Interface */}
         <div className="mb-8">
-          <OpenAIChatbot scenario={scenario} />
+          <RealtimeChatInterface />
         </div>
 
         {/* Technical Information */}
@@ -77,19 +77,19 @@ export default function OpenAIDemo() {
             <CardContent className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm">AI Model:</span>
-                <Badge variant="outline">GPT-4</Badge>
+                <Badge variant="outline">gpt-4o-realtime-preview</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Text-to-Speech:</span>
-                <Badge variant="outline">OpenAI TTS</Badge>
+                <span className="text-sm">Audio Technology:</span>
+                <Badge variant="outline">WebRTC Streaming</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Speech Recognition:</span>
-                <Badge variant="outline">Browser WebAPI</Badge>
+                <span className="text-sm">Connection:</span>
+                <Badge variant="outline">Real-time Bidirectional</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Idioma:</span>
-                <Badge variant="outline">Español Latinoamericano</Badge>
+                <span className="text-sm">Latencia:</span>
+                <Badge variant="outline">Ultra-baja (&lt;100ms)</Badge>
               </div>
             </CardContent>
           </Card>
@@ -116,23 +116,17 @@ export default function OpenAIDemo() {
             <CardTitle className="text-lg">📋 How to Use</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div>
-                <h4 className="font-semibold mb-2">1. Entrada de Texto</h4>
+                <h4 className="font-semibold mb-2">1. Conectar</h4>
                 <p className="text-muted-foreground">
-                  Escribe tus preguntas o comentarios en el área de texto y presiona Enviar o Enter.
+                  Haz clic en "Connect" para establecer una conexión WebRTC en tiempo real con la API de OpenAI.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">2. Entrada de Voz</h4>
+                <h4 className="font-semibold mb-2">2. Hablar</h4>
                 <p className="text-muted-foreground">
-                  Haz clic en el botón del micrófono para usar entrada de voz. Habla claramente en español.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">3. Reproducción de Audio</h4>
-                <p className="text-muted-foreground">
-                  Haz clic en el ícono del altavoz junto a las respuestas de IA para escucharlas en voz alta.
+                  Una vez conectado, simplemente habla. La IA escuchará y responderá en tiempo real sin retrasos.
                 </p>
               </div>
             </div>

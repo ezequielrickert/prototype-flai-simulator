@@ -1,9 +1,9 @@
-import OpenAI from 'openai';
+// import OpenAI from 'openai';
 
 export interface ProfessorAgentConfig {
   name: string;
   instructions: string;
-  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'Marin';
   temperature?: number;
   maxTokens?: number;
   language?: string;
@@ -78,17 +78,16 @@ export interface CoachingSession {
 }
 
 export class ProfessorAgentService {
-  private openai: OpenAI;
+  // private openai: OpenAI;
   private currentAgent: ProfessorAgentConfig;
   private activeSessions: Map<string, CoachingSession> = new Map();
   private ethicalDilemmas: EthicalDilemma[] = [];
 
   constructor(apiKey: string) {
-    this.openai = new OpenAI({ 
-      apiKey,
-      dangerouslyAllowBrowser: true
-    });
-    
+    // this.openai = new OpenAI({ 
+    //   apiKey,
+    //   dangerouslyAllowBrowser: true
+    // });
     this.currentAgent = this.getMarcusAgentConfig();
     this.initializeEthicalDilemmas();
   }
@@ -127,19 +126,37 @@ RESTRICCIONES:
 - Si el usuario se pone a la defensiva o inseguro, reduce la velocidad y tranquilízalo mientras lo guías hacia un razonamiento más claro
 
 Responde siempre en español y adopta completamente la personalidad de Marcus.`,
-      voice: 'echo', // Professional, warm voice for coaching
-      temperature: 0.7, // Higher for more conversational and natural responses
-      maxTokens: 1000, // Shorter responses for 5-minute sessions
+      voice: 'Marin',
+      temperature: 0.7,
+      maxTokens: 1000,
       language: 'es-ES',
       turnDetection: {
         type: 'server_vad',
         threshold: 0.5,
         prefixPaddingMs: 200,
-        silenceDurationMs: 3000, // Shorter for coaching conversation flow
+        silenceDurationMs: 3000,
         minWords: 2,
         interruptResponse: false
       }
     };
+  }
+
+  /**
+   * Build a string with previous Marcus questions and recent conversation for prompt context.
+   */
+  private buildConversationContext(session: CoachingSession): string {
+    // Get all assistant questions (Marcus) so far
+    const marcusQuestions = session.messages
+      .filter(m => m.role === 'assistant' && m.content.trim().endsWith('?'))
+      .map(m => m.content.trim());
+
+    // Build recent conversation (last 6 messages)
+    const recentMessages = session.messages.slice(-6);
+    const messageHistory = recentMessages
+      .map(m => `${m.role === 'user' ? 'Usuario' : 'Marcus'}: ${m.content}`)
+      .join('\n');
+
+    return `PREGUNTAS PREVIAS DE MARCUS (EVITAR REPETIR):\n${marcusQuestions.length > 0 ? marcusQuestions.join('\n') : 'Ninguna'}\n\nCONVERSACIÓN RECIENTE:\n${messageHistory}`;
   }
 
   private initializeEthicalDilemmas(): void {
@@ -238,28 +255,13 @@ Sigue este formato específico:
 3. Haz UNA pregunta específica inicial sobre su primera reacción o instinto
 
 IMPORTANTE:
-- Mantén el tono conversacional y profesional de Marcus
-- La pregunta inicial debe ser específica, no genérica
-- Evita preguntas como "¿qué piensas?" - sé más específico
-- Limítate a 3-4 oraciones total`;
+- Mantén un tono profesional pero cálido
+- NO uses terminología legal
+- Enfócate en principios éticos empresariales
+- Limita tu respuesta a 4-5 oraciones máximo`;
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: this.currentAgent.instructions
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_tokens: this.currentAgent.maxTokens,
-      temperature: this.currentAgent.temperature
-    });
-
-    return response.choices[0]?.message?.content || '';
+      // TODO: Implement new OpenAI Realtime API logic here
+      throw new Error('Not implemented: Use WebRTC Realtime API for chat.');
   }
 
   // Process user response and generate coaching response
@@ -325,120 +327,41 @@ IMPORTANTE:
   ): Promise<string> {
     const currentPhase = this.getCurrentPhase(session);
     const conversationContext = this.buildConversationContext(session);
-    
+
     let phaseInstructions = '';
-    
     switch (currentPhase) {
-      case 'inicio':
-        phaseInstructions = `El usuario ha dado su primera reacción. Ahora guíalo hacia la fase de exploración.
-        - Haz UNA pregunta abierta específica sobre su razonamiento inicial
-        - Evita preguntas genéricas como "¿qué piensas?" 
-        - Enfócate en un aspecto específico de su respuesta`;
+      case 'inicio': {
+        phaseInstructions = 'El usuario ha dado su primera reacción. Ahora guíalo hacia la fase de exploración.\n- Haz UNA pregunta abierta específica sobre su razonamiento inicial\n- Evita preguntas genéricas como "¿qué piensas?"\n- Enfócate en un aspecto específico de su respuesta';
         break;
-        
-      case 'exploracion':
+      }
+      case 'exploracion': {
         const needsDeepening = session.state.conversationDepth === 'surface';
         const topicsToExplore = session.dilemma.principles.filter(p => 
           !session.state.topicsExplored.includes(p)
         );
-        
         if (needsDeepening) {
-          phaseInstructions = `Profundiza en el razonamiento del usuario. 
-          - NO repitas preguntas ya hechas
-          - Explora aspectos específicos como: ${topicsToExplore.slice(0, 2).join(', ')}
-          - Pregunta sobre valores personales o experiencias previas
-          - Si ha dado respuestas superficiales, pide ejemplos concretos`;
+          phaseInstructions = 'Profundiza en el razonamiento del usuario.\n- NO repitas preguntas ya hechas\n- Explora aspectos específicos como: ' + topicsToExplore.slice(0, 2).join(', ') + '\n- Pregunta sobre valores personales o experiencias previas\n- Si ha dado respuestas superficiales, pide ejemplos concretos';
         } else {
-          phaseInstructions = `El usuario ha mostrado reflexión profunda. 
-          - Haz una pregunta final que integre lo discutido
-          - Prepara la transición hacia feedback
-          - Pregunta sobre las consecuencias o implicaciones de su decisión`;
+          phaseInstructions = 'El usuario ha mostrado reflexión profunda.\n- Haz una pregunta final que integre lo discutido\n- Prepara la transición hacia feedback\n- Pregunta sobre las consecuencias o implicaciones de su decisión';
         }
         break;
-        
-      case 'retroalimentacion':
-        phaseInstructions = `Resume el razonamiento del usuario y proporciona feedback constructivo.
-        - Identifica 1-2 fortalezas específicas en su razonamiento
-        - Señala 1 riesgo o punto ciego potencial
-        - Ofrece una recomendación práctica basada en mejores prácticas éticas
-        - Mantén un tono constructivo y de apoyo`;
+      }
+      case 'retroalimentacion': {
+        phaseInstructions = 'Resume el razonamiento del usuario y proporciona feedback constructivo.\n- Identifica 1-2 fortalezas específicas en su razonamiento\n- Señala 1 riesgo o punto ciego potencial\n- Ofrece una recomendación práctica basada en mejores prácticas éticas\n- Mantén un tono constructivo y de apoyo';
         break;
-        
-      case 'cierre':
-        phaseInstructions = `Cierra la sesión de manera memorable y alentadora.
-        - Refuerza UNA lección clave específica de hoy
-        - Conecta la lección con situaciones futuras
-        - Termina con palabras de aliento sobre su desarrollo ético`;
+      }
+      case 'cierre': {
+        phaseInstructions = 'Cierra la sesión de manera memorable y alentadora.\n- Refuerza UNA lección clave específica de hoy\n- Conecta la lección con situaciones futuras\n- Termina con palabras de aliento sobre su desarrollo ético';
         break;
+      }
     }
 
-    const prompt = `CONTEXTO DE LA SESIÓN:
-${conversationContext}
+    // Add context for prompt
+    const context = conversationContext;
+    const fullPrompt = `${phaseInstructions}\n\n${context}`;
 
-FASE ACTUAL: ${currentPhase.toUpperCase()}
-INSTRUCCIONES ESPECÍFICAS: ${phaseInstructions}
-
-ÚLTIMO MENSAJE DEL USUARIO: "${userMessage}"
-
-INSTRUCCIONES CRÍTICAS:
-- NO repitas preguntas que ya aparecen en "PREGUNTAS PREVIAS DE MARCUS"
-- Progresa la conversación naturalmente según la fase
-- Mantén respuestas concisas (1-3 oraciones máximo)
-- Sé específico, no genérico
-- Como Marcus, responde apropiadamente para esta fase de la sesión`;
-
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: this.currentAgent.instructions
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_tokens: this.currentAgent.maxTokens,
-      temperature: this.currentAgent.temperature
-    });
-
-    return response.choices[0]?.message?.content || '';
-  }
-
-  private buildConversationContext(session: CoachingSession): string {
-    const dilemma = session.dilemma;
-    const messageHistory = session.messages
-      .slice(-8) // Increased to 8 messages for better context
-      .map(m => `${m.role === 'user' ? 'Usuario' : 'Marcus'}: ${m.content}`)
-      .join('\n');
-
-    // Extract previous questions asked by Marcus to avoid repetition
-    const marcusQuestions = session.messages
-      .filter(m => m.role === 'assistant' && m.content.includes('?'))
-      .map(m => m.content.split('?')[0] + '?')
-      .slice(-3); // Last 3 questions
-
-    // Get topics already explored
-    const topicsExplored = session.state.topicsExplored.join(', ');
-    const conversationDepth = session.state.conversationDepth;
-    const questionsAsked = marcusQuestions.length;
-
-    return `DILEMA: ${dilemma.scenario}
-CATEGORÍA: ${dilemma.category}
-PRINCIPIOS CLAVE: ${dilemma.principles.join(', ')}
-
-ESTADO DE LA CONVERSACIÓN:
-- Profundidad: ${conversationDepth}
-- Temas explorados: ${topicsExplored || 'Ninguno aún'}
-- Preguntas realizadas: ${questionsAsked}
-- Listo para feedback: ${session.state.readinessForFeedback ? 'Sí' : 'No'}
-
-PREGUNTAS PREVIAS DE MARCUS (EVITAR REPETIR):
-${marcusQuestions.length > 0 ? marcusQuestions.join('\n') : 'Ninguna'}
-
-CONVERSACIÓN RECIENTE:
-${messageHistory}`;
+    // TODO: Implement OpenAI chat completion here
+    throw new Error('Not implemented: Use OpenAI API for response generation.');
   }
 
   private updateSessionPhase(session: CoachingSession): void {
@@ -492,7 +415,7 @@ ${messageHistory}`;
       currentPhase.completed = true;
       currentPhase.endTime = new Date();
     }
-    
+
     session.phases.push({
       name: newPhase,
       startTime: new Date(),
@@ -506,58 +429,48 @@ ${messageHistory}`;
       currentPhase.completed = true;
       currentPhase.endTime = new Date();
     }
-    
+
     session.completed = true;
     session.endTime = new Date();
-    session.duration = Date.now() - session.startTime.getTime();
+    session.duration = session.endTime.getTime() - session.startTime.getTime();
   }
 
   private analyzeConversationState(session: CoachingSession): void {
     const userMessages = session.messages.filter(m => m.role === 'user');
-    const lastUserMessages = userMessages.slice(-2); // Analyze last 2 user messages
+    const lastUserMessage = userMessages[userMessages.length - 1];
     
-    // Analyze conversation depth based on message content
-    const hasDeepReflection = lastUserMessages.some(m => 
-      m.content.length > 100 && // Longer, more thoughtful responses
-      (m.content.includes('porque') || m.content.includes('considero') || 
-       m.content.includes('creo que') || m.content.includes('mi experiencia'))
-    );
+    if (!lastUserMessage) return;
+
+    // Analyze conversation depth
+    const messageLength = lastUserMessage.content.length;
+    const hasExplanation = lastUserMessage.content.includes('porque') || 
+                          lastUserMessage.content.includes('ya que') ||
+                          lastUserMessage.content.includes('considero');
     
-    const hasValuesDiscussion = lastUserMessages.some(m =>
-      m.content.includes('valor') || m.content.includes('principio') || 
-      m.content.includes('ética') || m.content.includes('correcto')
-    );
-    
-    // Update conversation depth
-    if (hasDeepReflection && hasValuesDiscussion) {
-      session.state.conversationDepth = 'deep';
-      session.state.readinessForFeedback = true;
-    } else if (hasDeepReflection || hasValuesDiscussion) {
+    if (messageLength > 100 && hasExplanation) {
+      session.state.conversationDepth = userMessages.length >= 3 ? 'deep' : 'moderate';
+    } else if (messageLength > 50) {
       session.state.conversationDepth = 'moderate';
-      session.state.readinessForFeedback = userMessages.length >= 3;
-    } else {
-      session.state.conversationDepth = 'surface';
-      session.state.readinessForFeedback = false;
     }
-    
-    // Extract topics explored
-    const allContent = userMessages.map(m => m.content).join(' ').toLowerCase();
-    const topics = [];
-    
-    if (allContent.includes('transparencia') || allContent.includes('honesto')) topics.push('transparencia');
-    if (allContent.includes('conflicto') || allContent.includes('interés')) topics.push('conflicto_interes');
-    if (allContent.includes('responsabilidad') || allContent.includes('consecuencias')) topics.push('responsabilidad');
-    if (allContent.includes('equidad') || allContent.includes('justo')) topics.push('equidad');
-    if (allContent.includes('integridad') || allContent.includes('valores')) topics.push('integridad');
-    
-    session.state.topicsExplored = [...new Set([...session.state.topicsExplored, ...topics])];
+
+    // Check readiness for feedback
+    const hasReasoningDepth = session.state.conversationDepth !== 'surface';
+    const hasExploredTopics = session.state.topicsExplored.length >= 2;
+    const sufficientMessages = userMessages.length >= 3;
+
+    session.state.readinessForFeedback = hasReasoningDepth && (hasExploredTopics || sufficientMessages);
   }
 
-  // Generate session feedback and insights
-  async generateSessionFeedback(sessionId: string): Promise<SessionFeedback | null> {
+  // Get session status
+  getSession(sessionId: string): CoachingSession | undefined {
+    return this.activeSessions.get(sessionId);
+  }
+
+  // Generate comprehensive session feedback
+  async generateSessionFeedback(sessionId: string): Promise<SessionFeedback> {
     const session = this.activeSessions.get(sessionId);
-    if (!session || !session.completed) {
-      return null;
+    if (!session) {
+      throw new Error('Session not found');
     }
 
     const feedbackPrompt = `Analiza esta sesión de coaching ético completada y genera feedback estructurado.
@@ -565,130 +478,35 @@ ${messageHistory}`;
 DILEMA: ${session.dilemma.scenario}
 PRINCIPIOS CLAVE: ${session.dilemma.principles.join(', ')}
 
-CONVERSACIÓN COMPLETA:
+CONVERSACIÓN:
 ${session.messages.map(m => `${m.role === 'user' ? 'Usuario' : 'Marcus'}: ${m.content}`).join('\n')}
 
-Genera un análisis en formato JSON con la siguiente estructura:
-{
-  "userReasoning": ["razonamiento 1", "razonamiento 2"],
-  "ethicalPrinciples": ["principio aplicado 1", "principio aplicado 2"],
-  "strengthsIdentified": ["fortaleza 1", "fortaleza 2"],
-  "risksIdentified": ["riesgo 1", "riesgo 2"],
-  "finalRecommendation": "recomendación principal",
-  "keyLesson": "lección clave de la sesión",
-  "engagementLevel": "bajo|medio|alto",
-  "reflectionQuality": "superficial|moderada|profunda"
-}`;
+Genera feedback estructurado que incluya:
+1. Razonamiento del usuario (puntos principales)
+2. Principios éticos aplicados
+3. Fortalezas identificadas
+4. Riesgos o puntos ciegos
+5. Recomendación final
+6. Lección clave para recordar
+7. Nivel de engagement (bajo/medio/alto)
+8. Calidad de reflexión (superficial/moderada/profunda)`;
 
-    try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'Eres un evaluador experto en coaching ético. Analiza sesiones y proporciona feedback estructurado para mejorar el desarrollo ético.'
-          },
-          {
-            role: 'user',
-            content: feedbackPrompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.3
-      });
+    // TODO: Implement OpenAI completion for feedback generation
+    const feedback: SessionFeedback = {
+      id: `feedback-${sessionId}`,
+      sessionId,
+      userReasoning: ['Placeholder reasoning'],
+      ethicalPrinciples: session.dilemma.principles,
+      strengthsIdentified: ['Placeholder strength'],
+      risksIdentified: ['Placeholder risk'],
+      finalRecommendation: 'Placeholder recommendation',
+      keyLesson: 'Placeholder lesson',
+      engagementLevel: 'medio',
+      reflectionQuality: 'moderada',
+      timestamp: new Date()
+    };
 
-      const responseContent = response.choices[0]?.message?.content || '';
-      const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
-      const jsonStr = jsonMatch ? jsonMatch[0] : responseContent;
-      const feedbackData = JSON.parse(jsonStr);
-
-      const feedback: SessionFeedback = {
-        id: `feedback_${Date.now()}`,
-        sessionId,
-        ...feedbackData,
-        timestamp: new Date()
-      };
-
-      session.feedback = feedback;
-      return feedback;
-
-    } catch (error) {
-      console.error('Failed to generate session feedback:', error);
-      return null;
-    }
-  }
-
-  // Get session details
-  getSession(sessionId: string): CoachingSession | undefined {
-    return this.activeSessions.get(sessionId);
-  }
-
-  // Get all active sessions
-  getAllSessions(): CoachingSession[] {
-    return Array.from(this.activeSessions.values());
-  }
-
-  // End session manually
-  endSession(sessionId: string): void {
-    const session = this.activeSessions.get(sessionId);
-    if (session && !session.completed) {
-      const currentPhase = session.phases.find(p => !p.completed);
-      if (currentPhase) {
-        currentPhase.completed = true;
-        currentPhase.endTime = new Date();
-      }
-      session.completed = true;
-      session.endTime = new Date();
-      session.duration = Date.now() - session.startTime.getTime();
-    }
-  }
-
-  // Get available dilemmas
-  getAvailableDilemmas(): EthicalDilemma[] {
-    return this.ethicalDilemmas;
-  }
-
-  // Generate speech using Marcus's voice
-  async textToSpeech(text: string): Promise<ArrayBuffer> {
-    try {
-      const response = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.openai.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'tts-1-hd',
-          input: text,
-          voice: this.currentAgent.voice || 'onyx',
-          response_format: 'mp3',
-          speed: 0.85, // Slightly slower for thoughtful coaching tone
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.arrayBuffer();
-    } catch (error) {
-      console.error('Failed to generate speech:', error);
-      throw error;
-    }
-  }
-
-  // Get agent configuration
-  getAgentConfig(): ProfessorAgentConfig {
-    return this.currentAgent;
+    session.feedback = feedback;
+    return feedback;
   }
 }
-
-// Export a configured instance
-export const createProfessorAgentService = () => {
-  if (process.env.OPENAI_API_KEY) {
-    return new ProfessorAgentService(process.env.OPENAI_API_KEY);
-  }
-  return null;
-};
-
-export const professorAgentService = createProfessorAgentService();
