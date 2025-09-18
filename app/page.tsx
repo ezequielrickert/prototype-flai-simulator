@@ -96,7 +96,7 @@ export default function HomePage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: 'var(--blue-main)'}}>
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -112,7 +112,7 @@ export default function HomePage() {
                       Completado
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="border-blue-300 text-blue-700">
+                    <Badge variant="outline" style={{borderColor: 'var(--blue-main)', color: 'var(--blue-main)'}}>
                       Pendiente
                     </Badge>
                   )}
@@ -133,10 +133,10 @@ export default function HomePage() {
                   </div>
 
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                    <h4 className="font-semibold mb-2" style={{color: 'var(--cream)'}}>
                       Tema de Hoy: Conflictos de Interés
                     </h4>
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <p className="text-sm" style={{color: 'var(--cream)'}}>
                       Practica identificar y manejar situaciones donde tus intereses personales podrían entrar en
                       conflicto con tus responsabilidades profesionales.
                     </p>
@@ -197,7 +197,7 @@ export default function HomePage() {
                 </div>
                 <Progress value={progressToNextLevel} className="h-3" />
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userProgress.xp}</p>
+                  <p className="text-2xl font-bold" style={{color: 'var(--blue-main)'}}>{userProgress.xp}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Puntos de Experiencia</p>
                 </div>
               </CardContent>
