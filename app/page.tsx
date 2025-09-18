@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import {Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, TvMinimalPlay} from "lucide-react"
+import {Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay} from "lucide-react"
 import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
 
@@ -224,36 +223,32 @@ export default function HomePage() {
             </Card>
 
             {/* Upcoming Topics */}
-              <Card className="card-custom">
+            <Card className="card-custom">
               <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2">
-                    <Lock className="w-5 h-5 icon-gold" />
-                    Próximos Temas
-                  </CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="w-5 h-5 icon-gold" />
+                  Próximos Temas
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {[
-                  { topic: "Transparencia Financiera", level: 4, locked: false },
+                {[{ topic: "Transparencia Financiera", level: 4, locked: false },
                   { topic: "Denuncias Éticas", level: 5, locked: true },
-                  { topic: "Liderazgo Íntegro", level: 6, locked: true },
-                ].map((item, index) => (
+                  { topic: "Liderazgo Íntegro", level: 6, locked: true }].map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 panel rounded-lg"
+                    className={`proximo-tema-item${item.locked ? ' locked' : ''}`}
                   >
                     <div className="flex items-center gap-3">
                       {item.locked ? (
-                          <Lock className="w-4 h-4 muted" />
+                        <Lock className="w-5 h-5" />
                       ) : (
-                          <div className="w-4 h-4  rounded-full" />
+                        <span title="¡Desbloqueado!">
+                          <Unlock className="w-5 h-5 candado-abierto" />
+                        </span>
                       )}
-                        <span className={`text-sm ${item.locked ? "muted" : "text-gold"}`}>
-                        {item.topic}
-                      </span>
+                      <span className={`text-sm${item.locked ? ' muted' : ''}`}>{item.topic}</span>
                     </div>
-                      <Badge variant="outline" className="text-xs border-gold text-gold">
-                      Nivel {item.level}
-                    </Badge>
+                    <span className={`nivel-tag${item.locked ? ' locked' : ''}`}>Nivel {item.level}</span>
                   </div>
                 ))}
               </CardContent>
