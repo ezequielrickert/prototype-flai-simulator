@@ -112,7 +112,7 @@ export default function HomePage() {
                       Completado
                     </Badge>
                   ) : (
-                    <Badge variant="outline" style={{borderColor: 'var(--blue-main)', color: 'var(--blue-main)'}}>
+                    <Badge variant="outline" className="border-gold text-gold">
                       Pendiente
                     </Badge>
                   )}
@@ -197,7 +197,7 @@ export default function HomePage() {
                 </div>
                 <Progress value={progressToNextLevel} className="h-3" />
                 <div className="text-center">
-                  <p className="text-2xl font-bold" style={{color: 'var(--blue-main)'}}>{userProgress.xp}</p>
+                  <p className="text-2xl font-bold" style={{color: 'var(--trend-green)'}}>{userProgress.xp}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Puntos de Experiencia</p>
                 </div>
               </CardContent>
@@ -212,7 +212,7 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-2">
-                <div className="text-4xl font-bold text-gold">{userProgress.currentStreak}</div>
+                <div className="text-4xl font-bold" style={{color: 'var(--trend-green)'}}>{userProgress.currentStreak}</div>
                 <p className="text-sm muted">días consecutivos</p>
                 <div className="pt-2">
                   <Badge variant="outline" className="border-gold text-gold">
@@ -246,7 +246,7 @@ export default function HomePage() {
                           <Unlock className="w-5 h-5 candado-abierto" />
                         </span>
                       )}
-                      <span className={`text-sm${item.locked ? ' muted' : ''}`}>{item.topic}</span>
+                      <span className={`text-sm${item.locked ? ' muted' : ''}${!item.locked && item.level === 4 ? ' font-bold' : ''}`}>{item.topic}</span>
                     </div>
                     <span className={`nivel-tag${item.locked ? ' locked' : ''}`}>Nivel {item.level}</span>
                   </div>
