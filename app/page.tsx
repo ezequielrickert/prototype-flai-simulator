@@ -62,15 +62,15 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="header border-b">
-        <div className="container mx-auto px-4 py-4">
+      <header className="header border-b py-4">
+        <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl p-1 flex items-center justify-center" style={{background: '#181716', boxShadow: '0 0 16px 4px rgba(212,175,55,0.25)'}}>
                 <img src="/logo-integridai.png" alt="IntegridAI Logo" className="w-16 h-16 object-contain" style={{display: 'block'}} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-black">IntegridAI</h1>
+                <h1 className="text-xl font-bold muted">IntegridAI</h1>
                 <p className="text-sm muted">Capacitación Anti-Corrupción</p>
               </div>
             </div>

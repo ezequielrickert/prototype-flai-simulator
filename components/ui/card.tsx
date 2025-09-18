@@ -6,7 +6,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card"
-      className={cn('card-custom', className)}
+      className={cn('card-custom py-6', className)}
       {...props}
     />
   )
