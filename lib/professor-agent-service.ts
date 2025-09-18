@@ -38,6 +38,8 @@ export interface ConversationMessage {
   content: string;
   timestamp: Date;
   phase?: SessionPhase['name'];
+  messageType?: 'question' | 'response' | 'feedback' | 'transition';
+  topicsAddressed?: string[];
 }
 
 export interface SessionFeedback {
@@ -54,11 +56,20 @@ export interface SessionFeedback {
   timestamp: Date;
 }
 
+export interface SessionState {
+  questionsAsked: string[];
+  topicsExplored: string[];
+  userValues: string[];
+  readinessForFeedback: boolean;
+  conversationDepth: 'surface' | 'moderate' | 'deep';
+}
+
 export interface CoachingSession {
   id: string;
   dilemma: EthicalDilemma;
   phases: SessionPhase[];
   messages: ConversationMessage[];
+  state: SessionState;
   feedback?: SessionFeedback;
   startTime: Date;
   endTime?: Date;
@@ -116,7 +127,7 @@ RESTRICCIONES:
 - Si el usuario se pone a la defensiva o inseguro, reduce la velocidad y tranquilízalo mientras lo guías hacia un razonamiento más claro
 
 Responde siempre en español y adopta completamente la personalidad de Marcus.`,
-      voice: 'onyx', // Professional, warm voice for coaching
+      voice: 'echo', // Professional, warm voice for coaching
       temperature: 0.7, // Higher for more conversational and natural responses
       maxTokens: 1000, // Shorter responses for 5-minute sessions
       language: 'es-ES',
@@ -126,7 +137,7 @@ Responde siempre en español y adopta completamente la personalidad de Marcus.`,
         prefixPaddingMs: 200,
         silenceDurationMs: 3000, // Shorter for coaching conversation flow
         minWords: 2,
-        interruptResponse: true // Allow natural conversation flow
+        interruptResponse: false
       }
     };
   }
@@ -188,6 +199,13 @@ Responde siempre en español y adopta completamente la personalidad de Marcus.`,
         { name: 'inicio', startTime: new Date(), completed: false }
       ],
       messages: [],
+      state: {
+        questionsAsked: [],
+        topicsExplored: [],
+        userValues: [],
+        readinessForFeedback: false,
+        conversationDepth: 'surface'
+      },
       startTime: new Date(),
       completed: false
     };
@@ -212,13 +230,18 @@ Responde siempre en español y adopta completamente la personalidad de Marcus.`,
     const prompt = `Como Marcus, inicia una nueva sesión de coaching ético de 5 minutos. 
 
 DILEMA PARA HOY: ${dilemma.scenario}
+PRINCIPIOS CLAVE: ${dilemma.principles.join(', ')}
 
-Sigue este formato:
-1. Saluda brevemente y establece el contexto de la sesión de hoy
-2. Presenta el dilema de manera clara y concisa
-3. Invita al usuario a compartir su primera reacción
+Sigue este formato específico:
+1. Saluda brevemente y establece el contexto de la sesión de hoy (1 oración)
+2. Presenta el dilema de manera clara y concisa (2-3 oraciones)
+3. Haz UNA pregunta específica inicial sobre su primera reacción o instinto
 
-Mantén el tono conversacional y profesional de Marcus. Limítate a 2-3 oraciones por punto.`;
+IMPORTANTE:
+- Mantén el tono conversacional y profesional de Marcus
+- La pregunta inicial debe ser específica, no genérica
+- Evita preguntas como "¿qué piensas?" - sé más específico
+- Limítate a 3-4 oraciones total`;
 
     const response = await this.openai.chat.completions.create({
       model: 'gpt-4',
@@ -255,24 +278,40 @@ Mantén el tono conversacional y profesional de Marcus. Limítate a 2-3 oracione
       role: 'user',
       content: userMessage,
       timestamp: new Date(),
-      phase: currentPhase
+      phase: currentPhase,
+      messageType: 'response'
     });
 
     // Determine next action based on session state
     const nextResponse = await this.generateCoachingResponse(session, userMessage);
+
+    // Determine message type for assistant response
+    const messageType = this.determineMessageType(nextResponse, currentPhase);
 
     // Add assistant response to session
     session.messages.push({
       role: 'assistant',
       content: nextResponse,
       timestamp: new Date(),
-      phase: currentPhase
+      phase: currentPhase,
+      messageType
     });
 
     // Update session phases if needed
     this.updateSessionPhase(session);
 
     return nextResponse;
+  }
+
+  private determineMessageType(response: string, phase: SessionPhase['name']): ConversationMessage['messageType'] {
+    if (response.includes('?')) {
+      return 'question';
+    } else if (phase === 'retroalimentacion' || response.includes('fortaleza') || response.includes('recomiendo')) {
+      return 'feedback';
+    } else if (phase === 'cierre') {
+      return 'transition';
+    }
+    return 'response';
   }
 
   private getCurrentPhase(session: CoachingSession): SessionPhase['name'] {
@@ -291,16 +330,45 @@ Mantén el tono conversacional y profesional de Marcus. Limítate a 2-3 oracione
     
     switch (currentPhase) {
       case 'inicio':
-        phaseInstructions = 'El usuario ha dado su primera reacción. Ahora guíalo hacia la fase de exploración haciendo preguntas abiertas sobre su razonamiento.';
+        phaseInstructions = `El usuario ha dado su primera reacción. Ahora guíalo hacia la fase de exploración.
+        - Haz UNA pregunta abierta específica sobre su razonamiento inicial
+        - Evita preguntas genéricas como "¿qué piensas?" 
+        - Enfócate en un aspecto específico de su respuesta`;
         break;
+        
       case 'exploracion':
-        phaseInstructions = 'Profundiza en el razonamiento del usuario. Haz preguntas incisivas que revelen los principios éticos subyacentes. Ayúdalo a considerar diferentes perspectivas.';
+        const needsDeepening = session.state.conversationDepth === 'surface';
+        const topicsToExplore = session.dilemma.principles.filter(p => 
+          !session.state.topicsExplored.includes(p)
+        );
+        
+        if (needsDeepening) {
+          phaseInstructions = `Profundiza en el razonamiento del usuario. 
+          - NO repitas preguntas ya hechas
+          - Explora aspectos específicos como: ${topicsToExplore.slice(0, 2).join(', ')}
+          - Pregunta sobre valores personales o experiencias previas
+          - Si ha dado respuestas superficiales, pide ejemplos concretos`;
+        } else {
+          phaseInstructions = `El usuario ha mostrado reflexión profunda. 
+          - Haz una pregunta final que integre lo discutido
+          - Prepara la transición hacia feedback
+          - Pregunta sobre las consecuencias o implicaciones de su decisión`;
+        }
         break;
+        
       case 'retroalimentacion':
-        phaseInstructions = 'Resume el razonamiento del usuario y proporciona retroalimentación constructiva. Identifica fortalezas y riesgos, y ofrece la mejor práctica ética.';
+        phaseInstructions = `Resume el razonamiento del usuario y proporciona feedback constructivo.
+        - Identifica 1-2 fortalezas específicas en su razonamiento
+        - Señala 1 riesgo o punto ciego potencial
+        - Ofrece una recomendación práctica basada en mejores prácticas éticas
+        - Mantén un tono constructivo y de apoyo`;
         break;
+        
       case 'cierre':
-        phaseInstructions = 'Refuerza la lección clave de hoy y cierra con palabras de aliento. Prepara al usuario para la siguiente sesión.';
+        phaseInstructions = `Cierra la sesión de manera memorable y alentadora.
+        - Refuerza UNA lección clave específica de hoy
+        - Conecta la lección con situaciones futuras
+        - Termina con palabras de aliento sobre su desarrollo ético`;
         break;
     }
 
@@ -308,11 +376,16 @@ Mantén el tono conversacional y profesional de Marcus. Limítate a 2-3 oracione
 ${conversationContext}
 
 FASE ACTUAL: ${currentPhase.toUpperCase()}
-INSTRUCCIONES DE FASE: ${phaseInstructions}
+INSTRUCCIONES ESPECÍFICAS: ${phaseInstructions}
 
 ÚLTIMO MENSAJE DEL USUARIO: "${userMessage}"
 
-Como Marcus, responde apropiadamente para esta fase de la sesión. Mantén tu respuesta concisa (1-3 oraciones) y enfocada en el coaching ético.`;
+INSTRUCCIONES CRÍTICAS:
+- NO repitas preguntas que ya aparecen en "PREGUNTAS PREVIAS DE MARCUS"
+- Progresa la conversación naturalmente según la fase
+- Mantén respuestas concisas (1-3 oraciones máximo)
+- Sé específico, no genérico
+- Como Marcus, responde apropiadamente para esta fase de la sesión`;
 
     const response = await this.openai.chat.completions.create({
       model: 'gpt-4',
@@ -336,13 +409,33 @@ Como Marcus, responde apropiadamente para esta fase de la sesión. Mantén tu re
   private buildConversationContext(session: CoachingSession): string {
     const dilemma = session.dilemma;
     const messageHistory = session.messages
-      .slice(-6) // Last 6 messages for context
+      .slice(-8) // Increased to 8 messages for better context
       .map(m => `${m.role === 'user' ? 'Usuario' : 'Marcus'}: ${m.content}`)
       .join('\n');
+
+    // Extract previous questions asked by Marcus to avoid repetition
+    const marcusQuestions = session.messages
+      .filter(m => m.role === 'assistant' && m.content.includes('?'))
+      .map(m => m.content.split('?')[0] + '?')
+      .slice(-3); // Last 3 questions
+
+    // Get topics already explored
+    const topicsExplored = session.state.topicsExplored.join(', ');
+    const conversationDepth = session.state.conversationDepth;
+    const questionsAsked = marcusQuestions.length;
 
     return `DILEMA: ${dilemma.scenario}
 CATEGORÍA: ${dilemma.category}
 PRINCIPIOS CLAVE: ${dilemma.principles.join(', ')}
+
+ESTADO DE LA CONVERSACIÓN:
+- Profundidad: ${conversationDepth}
+- Temas explorados: ${topicsExplored || 'Ninguno aún'}
+- Preguntas realizadas: ${questionsAsked}
+- Listo para feedback: ${session.state.readinessForFeedback ? 'Sí' : 'No'}
+
+PREGUNTAS PREVIAS DE MARCUS (EVITAR REPETIR):
+${marcusQuestions.length > 0 ? marcusQuestions.join('\n') : 'Ninguna'}
 
 CONVERSACIÓN RECIENTE:
 ${messageHistory}`;
@@ -353,40 +446,111 @@ ${messageHistory}`;
     if (!currentPhase) return;
 
     const sessionDuration = Date.now() - session.startTime.getTime();
-    const messageCount = session.messages.filter(m => m.role === 'user').length;
+    const userMessages = session.messages.filter(m => m.role === 'user');
+    const assistantMessages = session.messages.filter(m => m.role === 'assistant');
+    const messageCount = userMessages.length;
 
-    // Transition logic based on time and interaction
+    // Analyze conversation depth and readiness
+    this.analyzeConversationState(session);
+
+    // Enhanced transition logic based on conversation quality and depth
     if (currentPhase.name === 'inicio' && messageCount >= 1) {
-      currentPhase.completed = true;
-      currentPhase.endTime = new Date();
-      session.phases.push({
-        name: 'exploracion',
-        startTime: new Date(),
-        completed: false
-      });
-    } else if (currentPhase.name === 'exploracion' && messageCount >= 3) {
-      currentPhase.completed = true;
-      currentPhase.endTime = new Date();
-      session.phases.push({
-        name: 'retroalimentacion',
-        startTime: new Date(),
-        completed: false
-      });
-    } else if (currentPhase.name === 'retroalimentacion' && messageCount >= 4) {
-      currentPhase.completed = true;
-      currentPhase.endTime = new Date();
-      session.phases.push({
-        name: 'cierre',
-        startTime: new Date(),
-        completed: false
-      });
-    } else if (currentPhase.name === 'cierre' || sessionDuration > 300000) { // 5 minutes
-      currentPhase.completed = true;
-      currentPhase.endTime = new Date();
-      session.completed = true;
-      session.endTime = new Date();
-      session.duration = sessionDuration;
+      // Move to exploration after first user response
+      this.transitionToPhase(session, 'exploracion');
+      
+    } else if (currentPhase.name === 'exploracion') {
+      // More intelligent transition conditions for exploration phase
+      const shouldTransitionToFeedback = 
+        (messageCount >= 3 && session.state.readinessForFeedback) ||
+        (messageCount >= 5) || // Maximum exploration messages
+        (session.state.conversationDepth === 'deep' && messageCount >= 3) ||
+        (sessionDuration > 180000); // 3 minutes maximum for exploration
+
+      if (shouldTransitionToFeedback) {
+        this.transitionToPhase(session, 'retroalimentacion');
+      }
+      
+    } else if (currentPhase.name === 'retroalimentacion') {
+      // Transition to closure after feedback is given
+      const feedbackGiven = assistantMessages.some(m => 
+        m.phase === 'retroalimentacion' && 
+        (m.content.includes('fortaleza') || m.content.includes('recomiendo') || m.content.includes('sugerencia'))
+      );
+      
+      if (feedbackGiven || messageCount >= 6) {
+        this.transitionToPhase(session, 'cierre');
+      }
+      
+    } else if (currentPhase.name === 'cierre' || sessionDuration > 300000) { // 5 minutes total
+      this.completeSession(session);
     }
+  }
+
+  private transitionToPhase(session: CoachingSession, newPhase: SessionPhase['name']): void {
+    const currentPhase = session.phases.find(p => !p.completed);
+    if (currentPhase) {
+      currentPhase.completed = true;
+      currentPhase.endTime = new Date();
+    }
+    
+    session.phases.push({
+      name: newPhase,
+      startTime: new Date(),
+      completed: false
+    });
+  }
+
+  private completeSession(session: CoachingSession): void {
+    const currentPhase = session.phases.find(p => !p.completed);
+    if (currentPhase) {
+      currentPhase.completed = true;
+      currentPhase.endTime = new Date();
+    }
+    
+    session.completed = true;
+    session.endTime = new Date();
+    session.duration = Date.now() - session.startTime.getTime();
+  }
+
+  private analyzeConversationState(session: CoachingSession): void {
+    const userMessages = session.messages.filter(m => m.role === 'user');
+    const lastUserMessages = userMessages.slice(-2); // Analyze last 2 user messages
+    
+    // Analyze conversation depth based on message content
+    const hasDeepReflection = lastUserMessages.some(m => 
+      m.content.length > 100 && // Longer, more thoughtful responses
+      (m.content.includes('porque') || m.content.includes('considero') || 
+       m.content.includes('creo que') || m.content.includes('mi experiencia'))
+    );
+    
+    const hasValuesDiscussion = lastUserMessages.some(m =>
+      m.content.includes('valor') || m.content.includes('principio') || 
+      m.content.includes('ética') || m.content.includes('correcto')
+    );
+    
+    // Update conversation depth
+    if (hasDeepReflection && hasValuesDiscussion) {
+      session.state.conversationDepth = 'deep';
+      session.state.readinessForFeedback = true;
+    } else if (hasDeepReflection || hasValuesDiscussion) {
+      session.state.conversationDepth = 'moderate';
+      session.state.readinessForFeedback = userMessages.length >= 3;
+    } else {
+      session.state.conversationDepth = 'surface';
+      session.state.readinessForFeedback = false;
+    }
+    
+    // Extract topics explored
+    const allContent = userMessages.map(m => m.content).join(' ').toLowerCase();
+    const topics = [];
+    
+    if (allContent.includes('transparencia') || allContent.includes('honesto')) topics.push('transparencia');
+    if (allContent.includes('conflicto') || allContent.includes('interés')) topics.push('conflicto_interes');
+    if (allContent.includes('responsabilidad') || allContent.includes('consecuencias')) topics.push('responsabilidad');
+    if (allContent.includes('equidad') || allContent.includes('justo')) topics.push('equidad');
+    if (allContent.includes('integridad') || allContent.includes('valores')) topics.push('integridad');
+    
+    session.state.topicsExplored = [...new Set([...session.state.topicsExplored, ...topics])];
   }
 
   // Generate session feedback and insights
