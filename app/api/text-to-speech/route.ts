@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const requestData = await request.json()
     text = requestData.text
-    const voice = requestData.voice || "alloy" // OpenAI voices: alloy, echo, fable, onyx, nova, shimmer
+    const voice = requestData.voice || "echo" // Echo is a professional male voice for Spanish
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })

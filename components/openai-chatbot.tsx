@@ -3,13 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useOpenAIChat } from '@/hooks/use-openai-chat';
-import { Mic, MicOff, Send, Volume2, VolumeX, MessageCircle } from 'lucide-react';
+import { TeachingScenario } from '@/lib/realtime-agent-service';
+import { ConversationFeedbackDisplay } from '@/components/conversation-feedback';
+import { Mic, MicOff, Send, Volume2, MessageCircle, GraduationCap, ChevronDown } from 'lucide-react';
 
 interface OpenAIChatbotProps {
-  scenario?: {
-    title: string;
-    description: string;
-  };
+  scenario?: TeachingScenario;
   className?: string;
 }
 
@@ -21,8 +20,11 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
     conversation,
     isLoading,
     error,
+    currentScenario,
     sendMessage,
     startNewConversation,
+    setScenario,
+    getAvailableScenarios,
     playAudio,
   } = useOpenAIChat();
 
@@ -30,9 +32,27 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [recognition, setRecognition] = useState<any>(null);
+  const [availableScenarios, setAvailableScenarios] = useState<TeachingScenario[]>([]);
+  const [showScenarios, setShowScenarios] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [useWhisper, setUseWhisper] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load available scenarios
+  useEffect(() => {
+    const loadScenarios = async () => {
+      const scenarios = await getAvailableScenarios();
+      setAvailableScenarios(scenarios);
+    };
+    loadScenarios();
+  }, [getAvailableScenarios]);
+
+  // Set initial scenario
+  useEffect(() => {
+    if (scenario && !currentScenario) {
+      setScenario(scenario);
+    }
+  }, [scenario, currentScenario, setScenario]);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -41,7 +61,7 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = false;
       recognitionInstance.interimResults = false;
-      recognitionInstance.lang = 'es-AR'; // Argentine Spanish
+      recognitionInstance.lang = 'es-419'; // Latin American Spanish
 
       recognitionInstance.onresult = (event: any) => {
         console.log('[Speech Recognition] Result received:', event);
@@ -103,7 +123,7 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
     if (!inputMessage.trim() || isLoading) return;
 
     try {
-      const aiMessage = await sendMessage(inputMessage, scenario);
+      const aiMessage = await sendMessage(inputMessage, currentScenario || scenario);
       setInputMessage('');
       
       // Auto-play AI response if audio is available
@@ -250,19 +270,28 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
           <div>
             <CardTitle className="text-xl">OpenAI Assistant</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Chat with AI powered by OpenAI GPT-4
+              {currentScenario ? `Agente: ${currentScenario.agentConfig.name}` : 'Chat with AI powered by OpenAI GPT-4'}
             </p>
           </div>
           <div className="flex gap-2">
-            {scenario && (
+            {currentScenario && (
               <Badge variant="outline" className="text-xs">
-                {scenario.title}
+                {currentScenario.title}
               </Badge>
             )}
             <Button 
               variant="outline" 
               size="sm"
-              onClick={startNewConversation}
+              onClick={() => setShowScenarios(!showScenarios)}
+            >
+              <GraduationCap className="w-4 h-4 mr-1" />
+              Select Agent
+              <ChevronDown className="w-3 h-3 ml-1" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => startNewConversation()}
             >
               New Chat
             </Button>
@@ -271,6 +300,32 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
       </CardHeader>
 
       <CardContent className="p-0">
+        {/* Scenario Selection */}
+        {showScenarios && (
+          <div className="p-4 border-b bg-muted/30">
+            <h3 className="text-sm font-medium mb-3">Selecciona un Agente Especializado:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {availableScenarios.map((s) => (
+                <Button
+                  key={s.id}
+                  variant={currentScenario?.id === s.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setScenario(s);
+                    setShowScenarios(false);
+                  }}
+                  className="justify-start text-left h-auto p-3"
+                >
+                  <div>
+                    <div className="font-medium text-sm">{s.title}</div>
+                    <div className="text-xs text-muted-foreground">{s.description}</div>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Chat Messages */}
         <div className="h-96 overflow-y-auto p-4 space-y-4">
           {conversation?.messages && conversation.messages.length > 0 ? (
@@ -396,6 +451,17 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
           </div>
         )}
       </CardContent>
+      
+      {/* Conversation Feedback */}
+      {conversation && conversation.messages && conversation.messages.length > 2 && (
+        <div className="p-4 border-t">
+          <ConversationFeedbackDisplay 
+            conversationId={conversation.id}
+            autoTriggerSeconds={30}
+            className="w-full"
+          />
+        </div>
+      )}
     </Card>
   );
 };

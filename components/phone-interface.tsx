@@ -208,7 +208,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
       speechSynthesis.cancel()
 
       const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = "es-AR" // Específicamente argentino
+      utterance.lang = "es-419" // Español latinoamericano
       utterance.rate = 0.85 // Velocidad natural argentina
       utterance.pitch = 1.0 // Pitch neutro
       utterance.volume = 0.9
@@ -216,7 +216,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
       const voices = speechSynthesis.getVoices()
       const argentineVoice = voices.find(
         (voice) =>
-          (voice.lang.includes("es-AR") || voice.lang.includes("es-MX") || voice.lang.includes("es-CO")) &&
+          (voice.lang.includes("es-419") || voice.lang.includes("es-MX") || voice.lang.includes("es-CO") || voice.lang.includes("es-AR") || voice.lang.includes("es-CL")) &&
           (voice.name.includes("Google") || voice.name.includes("Microsoft") || voice.name.includes("Natural")),
       )
       if (argentineVoice) {
@@ -317,7 +317,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
 
       recognitionInstance.continuous = false // Mantener false para evitar errores de red
       recognitionInstance.interimResults = true
-      recognitionInstance.lang = "es-ES"
+      recognitionInstance.lang = "es-419" // Español latinoamericano
       recognitionInstance.maxAlternatives = 1
 
       // Configuraciones mejoradas para reducir errores de red

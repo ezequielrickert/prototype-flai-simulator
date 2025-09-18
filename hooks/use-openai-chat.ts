@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { TeachingScenario } from '@/lib/realtime-agent-service';
 
 export interface OpenAIMessage {
   id: string;
@@ -12,18 +13,25 @@ export interface OpenAIConversation {
   id: string;
   messages: OpenAIMessage[];
   isActive: boolean;
+  scenario?: TeachingScenario;
 }
 
 export const useOpenAIChat = () => {
   const [conversation, setConversation] = useState<OpenAIConversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentScenario, setCurrentScenario] = useState<TeachingScenario | null>(null);
 
-  const sendMessage = useCallback(async (message: string, scenario?: any) => {
+  const sendMessage = useCallback(async (message: string, scenario?: TeachingScenario) => {
     setIsLoading(true);
     setError(null);
 
     try {
+      // Update current scenario if provided
+      if (scenario) {
+        setCurrentScenario(scenario);
+      }
+
       const response = await fetch('/api/openai-chat', {
         method: 'POST',
         headers: {
@@ -32,7 +40,7 @@ export const useOpenAIChat = () => {
         body: JSON.stringify({
           message,
           conversationId: conversation?.id,
-          scenario,
+          scenario: scenario || currentScenario,
         }),
       });
 
@@ -62,6 +70,7 @@ export const useOpenAIChat = () => {
           return {
             ...prev,
             messages: [...prev.messages, userMessage, aiMessage],
+            scenario: scenario || currentScenario || prev.scenario,
           };
         } else {
           // Create new conversation
@@ -69,6 +78,7 @@ export const useOpenAIChat = () => {
             id: data.conversationId,
             messages: [userMessage, aiMessage],
             isActive: true,
+            scenario: scenario || currentScenario || undefined,
           };
         }
       });
@@ -81,11 +91,31 @@ export const useOpenAIChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [conversation?.id]);
+  }, [conversation?.id, currentScenario]);
 
-  const startNewConversation = useCallback(() => {
+  const startNewConversation = useCallback((scenario?: TeachingScenario) => {
     setConversation(null);
     setError(null);
+    if (scenario) {
+      setCurrentScenario(scenario);
+    }
+  }, []);
+
+  const setScenario = useCallback((scenario: TeachingScenario) => {
+    setCurrentScenario(scenario);
+    // If there's an active conversation, update its scenario
+    setConversation(prev => prev ? { ...prev, scenario } : null);
+  }, []);
+
+  const getAvailableScenarios = useCallback(async () => {
+    try {
+      const response = await fetch('/api/scenarios');
+      const data = await response.json();
+      return data.scenarios || [];
+    } catch (error) {
+      console.error('Error fetching scenarios:', error);
+      return [];
+    }
   }, []);
 
   const playAudio = useCallback(async (text: string, voice?: string) => {
@@ -136,8 +166,11 @@ export const useOpenAIChat = () => {
     conversation,
     isLoading,
     error,
+    currentScenario,
     sendMessage,
     startNewConversation,
+    setScenario,
+    getAvailableScenarios,
     playAudio,
     getConversation,
   };

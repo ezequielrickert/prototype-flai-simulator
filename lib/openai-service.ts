@@ -1,5 +1,4 @@
-import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import { realtimeAgentService, RealtimeAgentService, TeachingScenario } from './realtime-agent-service';
 
 export interface OpenAIMessage {
   id: string;
@@ -13,14 +12,17 @@ export interface OpenAIConversation {
   id: string;
   messages: OpenAIMessage[];
   isActive: boolean;
+  scenario?: TeachingScenario;
 }
 
 export class OpenAIService {
   private apiKey: string;
   private baseUrl = "https://api.openai.com/v1";
+  private agentService: RealtimeAgentService | null;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
+    this.agentService = realtimeAgentService;
   }
 
   private getHeaders() {
@@ -30,45 +32,75 @@ export class OpenAIService {
     };
   }
 
-  // Generate text using OpenAI Chat Completions
-  async generateResponse(messages: Array<{role: 'user' | 'assistant' | 'system', content: string}>, scenario?: any) {
+  // Set the current agent based on scenario
+  setAgent(scenario: TeachingScenario) {
+    if (this.agentService) {
+      this.agentService.setAgent(scenario);
+    }
+  }
+
+  // Generate text using the configured agent with conversation history
+  async generateResponse(
+    messages: Array<{role: 'user' | 'assistant' | 'system', content: string}>, 
+    scenario?: TeachingScenario,
+    conversationId?: string
+  ) {
     try {
-      // Add system prompt if scenario is provided
-      const systemPrompt = scenario 
-        ? `You are an AI assistant for ethics and anti-corruption training. Current scenario: ${scenario.title} - ${scenario.description}. Provide helpful, educational responses in Spanish.`
-        : "You are an AI assistant for ethics and anti-corruption training. Provide helpful, educational responses in Spanish.";
+      // If scenario is provided, set the agent
+      if (scenario && this.agentService) {
+        this.agentService.setAgent(scenario);
+        return await this.agentService.generateResponse(messages, conversationId);
+      }
+
+      // Fallback to direct OpenAI API call
+      const systemPrompt = "You are an AI assistant for ethics and anti-corruption training. Provide helpful, educational responses in Spanish.";
 
       const messagesWithSystem = [
         { role: 'system' as const, content: systemPrompt },
         ...messages
       ];
 
-      const result = await generateText({
-        model: openai('gpt-4'),
-        messages: messagesWithSystem,
-        maxTokens: 1000,
-        temperature: 0.7,
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: messagesWithSystem,
+          max_tokens: 1000,
+          temperature: 0.7,
+        }),
       });
 
-      return result.text;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0]?.message?.content || '';
     } catch (error) {
       console.error("Failed to generate response:", error);
       throw error;
     }
   }
 
-  // Generate speech from text using OpenAI TTS
-  async textToSpeech(text: string, voice: string = 'alloy'): Promise<ArrayBuffer> {
+  // Generate speech from text using configured agent or default voice
+  async textToSpeech(text: string, voice?: string): Promise<ArrayBuffer> {
     try {
+      // Use agent service if available and agent is configured
+      if (this.agentService && this.agentService.getCurrentAgent()) {
+        return await this.agentService.textToSpeech(text);
+      }
+
+      // Fallback to direct API call with Spanish optimization
       const response = await fetch(`${this.baseUrl}/audio/speech`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
-          model: 'tts-1',
+          model: 'tts-1-hd', // Use HD model for better Spanish pronunciation
           input: text,
-          voice: voice, // alloy, echo, fable, onyx, nova, shimmer
+          voice: voice || 'echo', // Echo is a professional male voice
           response_format: 'mp3',
-          speed: 1.0,
+          speed: 0.9, // Slightly slower for clearer Spanish pronunciation
         }),
       });
 
@@ -81,6 +113,11 @@ export class OpenAIService {
       console.error("Failed to generate speech:", error);
       throw error;
     }
+  }
+
+  // Get current agent info
+  getCurrentAgent() {
+    return this.agentService?.getCurrentAgent();
   }
 
   // Transcribe audio using OpenAI Whisper
@@ -121,6 +158,34 @@ export class OpenAIService {
       { id: 'nova', name: 'Nova', description: 'Female voice' },
       { id: 'shimmer', name: 'Shimmer', description: 'Soft female voice' },
     ];
+  }
+
+  // Get available teaching scenarios
+  getAvailableScenarios(): TeachingScenario[] {
+    return RealtimeAgentService.getAvailableScenarios();
+  }
+
+  // Get conversation history
+  getConversationHistory(conversationId: string) {
+    if (this.agentService) {
+      return this.agentService.getConversationHistory(conversationId);
+    }
+    return undefined;
+  }
+
+  // Clear conversation history
+  clearConversationHistory(conversationId: string) {
+    if (this.agentService) {
+      this.agentService.clearConversationHistory(conversationId);
+    }
+  }
+
+  // Get all conversation IDs
+  getAllConversationIds(): string[] {
+    if (this.agentService) {
+      return this.agentService.getAllConversationIds();
+    }
+    return [];
   }
 }
 

@@ -17,7 +17,7 @@ export default function OpenAIDemo() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">OpenAI Integration Demo</h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Experience AI-powered conversations using OpenAI's GPT-4 and text-to-speech capabilities
+            Experimenta conversaciones con IA usando GPT-4 de OpenAI y síntesis de voz optimizada para español latinoamericano
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <Badge variant="secondary">OpenAI GPT-4</Badge>
@@ -35,7 +35,7 @@ export default function OpenAIDemo() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Use speech-to-text to communicate naturally with the AI assistant
+                Usa reconocimiento de voz para comunicarte naturalmente con el asistente de IA
               </p>
             </CardContent>
           </Card>
@@ -46,7 +46,7 @@ export default function OpenAIDemo() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Receive AI responses with natural-sounding voice synthesis using OpenAI TTS
+                Recibe respuestas de IA con síntesis de voz natural optimizada para español latinoamericano
               </p>
             </CardContent>
           </Card>
@@ -57,7 +57,7 @@ export default function OpenAIDemo() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Powered by OpenAI GPT-4 for intelligent, context-aware responses
+                Impulsado por GPT-4 de OpenAI para respuestas inteligentes y contextualmente apropiadas
               </p>
             </CardContent>
           </Card>
@@ -88,8 +88,8 @@ export default function OpenAIDemo() {
                 <Badge variant="outline">Browser WebAPI</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Language:</span>
-                <Badge variant="outline">Spanish (Argentina)</Badge>
+                <span className="text-sm">Idioma:</span>
+                <Badge variant="outline">Español Latinoamericano</Badge>
               </div>
             </CardContent>
           </Card>
@@ -118,21 +118,21 @@ export default function OpenAIDemo() {
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
-                <h4 className="font-semibold mb-2">1. Text Input</h4>
+                <h4 className="font-semibold mb-2">1. Entrada de Texto</h4>
                 <p className="text-muted-foreground">
-                  Type your questions or comments in the text area and press Send or Enter.
+                  Escribe tus preguntas o comentarios en el área de texto y presiona Enviar o Enter.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">2. Voice Input</h4>
+                <h4 className="font-semibold mb-2">2. Entrada de Voz</h4>
                 <p className="text-muted-foreground">
-                  Click the microphone button to use voice input. Speak clearly in Spanish.
+                  Haz clic en el botón del micrófono para usar entrada de voz. Habla claramente en español.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">3. Audio Playback</h4>
+                <h4 className="font-semibold mb-2">3. Reproducción de Audio</h4>
                 <p className="text-muted-foreground">
-                  Click the speaker icon next to AI responses to hear them spoken aloud.
+                  Haz clic en el ícono del altavoz junto a las respuestas de IA para escucharlas en voz alta.
                 </p>
               </div>
             </div>

@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openaiService } from "@/lib/openai-service";
+import { TeachingScenario } from "@/lib/realtime-agent-service";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversationId, scenario } = await request.json();
+    const { message, conversationId, scenario }: { 
+      message: string; 
+      conversationId?: string; 
+      scenario?: TeachingScenario 
+    } = await request.json();
 
     if (!message) {
       return NextResponse.json({
@@ -29,16 +34,15 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // For simplicity, we'll treat each conversation as independent
-      // In a real app, you might want to store conversation history in a database
+      // Build message array for the API call
       const messages = [
         { role: 'user' as const, content: message }
       ];
 
-      const response = await openaiService.generateResponse(messages, scenario);
-
       // Generate unique conversation ID if not provided
       const newConversationId = conversationId || `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const response = await openaiService.generateResponse(messages, scenario, newConversationId);
 
       return NextResponse.json({
         success: true,
@@ -46,6 +50,7 @@ export async function POST(request: NextRequest) {
         response: {
           text: response,
           timestamp: new Date().toISOString(),
+          agent: scenario ? scenario.agentConfig.name : 'Assistant',
         },
         agentResponse: {
           text: response,

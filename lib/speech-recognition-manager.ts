@@ -45,7 +45,7 @@ export class SpeechRecognitionManager {
       
       this.recognition.continuous = options.continuous ?? false;
       this.recognition.interimResults = options.interimResults ?? false;
-      this.recognition.lang = options.language ?? 'es-AR';
+      this.recognition.lang = options.language ?? 'es-419'; // Latin American Spanish by default
 
       this.recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
