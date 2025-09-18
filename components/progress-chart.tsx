@@ -33,8 +33,10 @@ export function ProgressChart() {
             <Tooltip
               formatter={(value: number, name: string) => [`${value}%`, name === "score" ? "Puntuación" : name]}
               labelFormatter={(label) => `Día: ${label}`}
+              cursor={{ fill: "rgba(0,0,0,0)" }}
+              contentStyle={{ background: "#181716", color: "#FAF0E6", border: "none", borderRadius: "0.75rem", boxShadow: "0 2px 8px 0 rgba(40,30,10,0.18)" }}
             />
-            <Bar dataKey="score" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="score" fill="#2647A3" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -47,13 +49,17 @@ export function ProgressChart() {
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="week" />
             <YAxis domain={[70, 100]} />
-            <Tooltip formatter={(value: number) => [`${value}%`, "Promedio"]} />
+            <Tooltip
+              formatter={(value: number) => [`${value}%`, "Promedio"]}
+              cursor={{ stroke: "rgba(0,0,0,0)", strokeWidth: 2 }}
+              contentStyle={{ background: "#181716", color: "#FAF0E6", border: "none", borderRadius: "0.75rem", boxShadow: "0 2px 8px 0 rgba(40,30,10,0.18)" }}
+            />
             <Line
               type="monotone"
               dataKey="avg"
-              stroke="#10b981"
+              stroke="#26A331"
               strokeWidth={3}
-              dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+              dot={{ fill: "#26A331", strokeWidth: 2, r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>
