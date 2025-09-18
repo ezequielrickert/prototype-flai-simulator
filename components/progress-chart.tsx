@@ -38,6 +38,12 @@ export function ProgressChart() {
         <h4 className="font-semibold mb-3">Progreso de la Semana</h4>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={progressData}>
+            <defs>
+              <linearGradient id="goldBarGradient" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor="#B8860B" />
+                <stop offset="100%" stopColor="#D4AF37" />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="day" />
             <YAxis domain={[0, 100]} />
@@ -47,7 +53,7 @@ export function ProgressChart() {
               cursor={{ fill: "rgba(0,0,0,0)" }}
               contentStyle={{ background: "#181716", color: "#FAF0E6", border: "none", borderRadius: "0.75rem", boxShadow: "0 2px 8px 0 rgba(40,30,10,0.18)" }}
             />
-            <Bar dataKey="score" fill="#2647A3" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="score" fill="url(#goldBarGradient)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -57,6 +63,15 @@ export function ProgressChart() {
         <h4 className="font-semibold mb-3">Tendencia Mensual</h4>
         <ResponsiveContainer width="100%" height={150}>
           <LineChart data={weeklyData}>
+            <defs>
+              <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="week" />
             <YAxis domain={[70, 100]} />
@@ -68,9 +83,10 @@ export function ProgressChart() {
             <Line
               type="monotone"
               dataKey="avg"
-              stroke="#26A331"
+              stroke="#D4AF37"
               strokeWidth={3}
-              dot={{ fill: "#26A331", strokeWidth: 2, r: 4 }}
+              dot={{ fill: "#D4AF37", strokeWidth: 2, r: 4, filter: "url(#goldGlow)" }}
+              filter="url(#goldGlow)"
             />
           </LineChart>
         </ResponsiveContainer>
