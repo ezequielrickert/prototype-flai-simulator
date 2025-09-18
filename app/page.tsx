@@ -146,22 +146,7 @@ export default function HomePage() {
                   <Button
                     onClick={handleStartQuiz}
                     disabled={userProgress.completedToday}
-                    style={{
-                      backgroundColor: userProgress.completedToday ? "#6b7280" : "#1d4ed8",
-                      color: "#ffffff",
-                      border: "none",
-                    }}
-                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105"
-                    onMouseEnter={(e) => {
-                      if (!userProgress.completedToday) {
-                        e.currentTarget.style.backgroundColor = "#1e40af"
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!userProgress.completedToday) {
-                        e.currentTarget.style.backgroundColor = "#1d4ed8"
-                      }
-                    }}
+                    className={`button-beige w-full font-semibold py-3 rounded-lg transition-all duration-200 ${userProgress.completedToday ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {userProgress.completedToday ? (
                       <>
