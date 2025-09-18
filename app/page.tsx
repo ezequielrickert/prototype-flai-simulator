@@ -90,7 +90,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-10">
             {/* Daily Challenge Card */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
@@ -179,7 +179,7 @@ export default function HomePage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-10">
             {/* Level Progress */}
             <Card className="card-custom">
               <CardHeader className="pb-4">

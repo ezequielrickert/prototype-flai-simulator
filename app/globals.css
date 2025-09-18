@@ -43,7 +43,7 @@
   --card: var(--gray-dark);
   --card-foreground: var(--cream);
   --card-border: var(--gold);
-  --card-shadow: 0 8px 32px 0 rgb(106, 85, 24);
+    --card-shadow: 0 0 16px 0 rgba(212,175,55,0.2);
   --panel-bg: var(--brown-dark);
   --panel-text: var(--cream);
 }
