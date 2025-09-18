@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock } from "lucide-react"
+import {Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, TvMinimalPlay} from "lucide-react"
 import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
 
@@ -93,7 +93,7 @@ export default function HomePage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Daily Challenge Card */}
-            <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+            <Card className="card-custom">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -101,7 +101,9 @@ export default function HomePage() {
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-xl">Desafío Diario</CardTitle>
+                      <CardTitle className="flex items-center gap-2">
+                        Desafío Diario
+                      </CardTitle>
                       <CardDescription>Conversación con IA - 5 minutos</CardDescription>
                     </div>
                   </div>
@@ -178,10 +180,10 @@ export default function HomePage() {
             </Card>
 
             {/* Progress Chart */}
-            <Card>
+            <Card className="card-custom">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
+                  <Target className="w-5 h-5 icon-gold" />
                   Tu Progreso
                 </CardTitle>
                 <CardDescription>Seguimiento de tu desarrollo en los últimos 30 días</CardDescription>
@@ -195,9 +197,12 @@ export default function HomePage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Level Progress */}
-            <Card>
+            <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Progreso de Nivel</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <TvMinimalPlay className="w-5 h-5 icon-gold" />
+                  Progreso de Nivel
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -217,8 +222,8 @@ export default function HomePage() {
             {/* Streak Counter */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg text-gold flex items-center gap-2">
-                    <Trophy className="w-5 h-5 icon-gold" />
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5 icon-gold" />
                   Racha Actual
                 </CardTitle>
               </CardHeader>
@@ -236,7 +241,10 @@ export default function HomePage() {
             {/* Upcoming Topics */}
               <Card className="card-custom">
               <CardHeader className="pb-4">
-                  <CardTitle className="text-lg text-gold">Próximos Temas</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock className="w-5 h-5 icon-gold" />
+                    Próximos Temas
+                  </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -252,7 +260,7 @@ export default function HomePage() {
                       {item.locked ? (
                           <Lock className="w-4 h-4 muted" />
                       ) : (
-                          <div className="w-4 h-4 icon-gold rounded-full" />
+                          <div className="w-4 h-4  rounded-full" />
                       )}
                         <span className={`text-sm ${item.locked ? "muted" : "text-gold"}`}>
                         {item.topic}
