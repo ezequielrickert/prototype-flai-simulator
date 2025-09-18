@@ -189,7 +189,7 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-2">
-                <div className="text-4xl font-bold streak-number">{userProgress.level}</div>
+                <div className="big-number-gold">{userProgress.level}</div>
                 <div className="separator" />
                 <p className="text-sm muted">Nivel actual</p>
                 <div className="pt-2">
@@ -214,7 +214,7 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-2">
-                <div className="text-4xl font-bold streak-number">{userProgress.currentStreak}</div>
+                <div className="big-number-gold">{userProgress.currentStreak}</div>
                 <div className="separator" />
                 <p className="text-sm muted">días consecutivos</p>
                 <div className="pt-2">

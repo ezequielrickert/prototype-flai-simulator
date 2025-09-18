@@ -104,7 +104,11 @@
     background: var(--card);
     color: var(--card-foreground);
     border: 2px solid var(--card-border);
-    box-shadow: var(--card-shadow);
+    box-shadow:
+      0 2px 8px 0 rgba(212,175,55,0.10),
+      0 8px 32px 0 rgba(212,175,55,0.18),
+      0 1.5px 6px 0 rgba(40,30,10,0.08),
+      0 0.5px 2px 0 rgba(139,69,19,0.08);
     border-radius: var(--radius);
   }
   .panel {
@@ -132,8 +136,10 @@
     filter: drop-shadow(0 0 8px #d4af37cc) drop-shadow(0 0 4px #fffbe6aa);
   }
   .separator {
-    border-bottom: 1px solid var(--separator);
+    border-bottom: 1px solid #D4AF37;
+    opacity: 0.45;
     margin: 1em 0;
+    height: 0;
   }
   .muted {
     color: var(--muted);
@@ -184,6 +190,12 @@
     background: var(--background);
     color: var(--muted);
   }
+  .proximo-tema-item:not(.locked):hover {
+    box-shadow: 0 0 24px 4px #D4AF37cc, 0 2px 8px 0 rgba(40,30,10,0.08);
+    border: 2px solid #D4AF37;
+    z-index: 1;
+    transition: box-shadow 0.2s, border 0.2s;
+  }
   .nivel-tag {
     background: var(--beige);
     color: var(--brown-dark);
@@ -226,8 +238,8 @@
   .header-title-dark {
     color: var(--black);
     font-weight: 900;
-    letter-spacing: 0.08em;
-    font-size: 2.1rem;
+    letter-spacing: 0.12em;
+    font-size: 2.2rem;
     text-shadow: 0 1px 8px #2C2C2C22;
   }
 
@@ -291,4 +303,93 @@
   }
 
   /* --- Fin de personalizaciones --- */
+
+  /* --- Refinamientos premium y opciones de textura --- */
+
+  .card-custom {
+    box-shadow:
+      0 2px 8px 0 rgba(212,175,55,0.10),
+      0 8px 32px 0 rgba(212,175,55,0.18),
+      0 1.5px 6px 0 rgba(40,30,10,0.08),
+      0 0.5px 2px 0 rgba(139,69,19,0.08);
+  }
+
+  .header-title-dark {
+    color: var(--black);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    font-size: 2.2rem;
+    text-shadow: 0 1px 8px #2C2C2C22;
+  }
+
+  .separator {
+    border-bottom: 1px solid #D4AF37;
+    opacity: 0.45;
+    margin: 1em 0;
+    height: 0;
+  }
+
+  .proximo-tema-item:not(.locked):hover {
+    box-shadow: 0 0 24px 4px #D4AF37cc, 0 2px 8px 0 rgba(40,30,10,0.08);
+    border: 2px solid #D4AF37;
+    z-index: 1;
+    transition: box-shadow 0.2s, border 0.2s;
+  }
+
+  /* Opciones de textura de fondo */
+  .body-textura-diagonal {
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="40" height="40" fill="%23FAF0E6" fill-opacity="0.03"/><path d="M0 0L40 40M40 0L0 40" stroke="%23D4AF37" stroke-opacity="0.04" stroke-width="1"/></svg>');
+    background-size: 40px 40px;
+  }
+  .body-textura-puntos {
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="1.5" fill="%23D4AF37" fill-opacity="0.07"/><circle cx="30" cy="30" r="1.5" fill="%23D4AF37" fill-opacity="0.07"/></svg>');
+    background-size: 40px 40px;
+  }
+  .body-textura-hexagonos {
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="20,5 35,15 35,35 20,45 5,35 5,15" stroke="%23D4AF37" stroke-width="1" stroke-opacity="0.04" fill="none"/></svg>');
+    background-size: 40px 40px;
+  }
+  /* Para cambiar la textura, pon la clase correspondiente en el body: body-textura-diagonal, body-textura-puntos o body-textura-hexagonos */
+
+  .badge {
+    border-radius: 1.5em;
+    box-shadow: 0 2px 8px 0 rgba(212,175,55,0.10), 0 1px 4px 0 rgba(40,30,10,0.08);
+    border: 2px solid #D4AF37;
+    background: linear-gradient(120deg, #fffbe6 0%, #d4af37 100%);
+    color: var(--badge-text);
+    position: relative;
+    padding: 0.45em 1.3em;
+    font-weight: bold;
+    font-size: 1.08em;
+  }
+
+  .streak-number {
+    font-size: 5.2rem;
+    font-weight: 900;
+    color: #D4AF37;
+    text-shadow: 0 0 24px #D4AF37cc, 0 0 8px #fffbe6aa;
+    letter-spacing: 0.07em;
+    animation: streakGlow 1.5s infinite alternate;
+  }
+  @keyframes streakGlow {
+    0% { text-shadow: 0 0 24px #D4AF37cc, 0 0 8px #fffbe6aa; }
+    100% { text-shadow: 0 0 48px #D4AF37ee, 0 0 16px #fffbe6cc; }
+  }
+
+  /* --- Fin refinamientos premium --- */
+
+  /* Número grande dorado con animación de glow */
+.big-number-gold {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 32px #D4AF37cc, 0 0 12px #fffbe6aa;
+  letter-spacing: 0.09em;
+  animation: bigNumberGlow 1.5s infinite alternate;
+  transition: font-size 0.2s;
+}
+@keyframes bigNumberGlow {
+  0% { text-shadow: 0 0 32px #D4AF37cc, 0 0 12px #fffbe6aa; }
+  100% { text-shadow: 0 0 64px #D4AF37ee, 0 0 24px #fffbe6cc; }
+}
 }
