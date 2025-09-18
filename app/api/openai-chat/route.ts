@@ -1,81 +1,115 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openaiService } from "@/lib/openai-service";
-import { TeachingScenario } from "@/lib/realtime-agent-service";
+import { EthicalDilemma } from "@/lib/professor-agent-service";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversationId, scenario }: { 
-      message: string; 
-      conversationId?: string; 
-      scenario?: TeachingScenario 
-    } = await request.json();
-
-    if (!message) {
-      return NextResponse.json({
-        success: false,
-        error: "Message is required",
-      }, { status: 400 });
-    }
-
-    if (!OPENAI_API_KEY) {
-      return NextResponse.json({
-        success: false,
-        error: "OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.",
-      }, { status: 500 });
-    }
-
-    if (!openaiService) {
-      return NextResponse.json({
-        success: false,
-        error: "OpenAI service not configured",
-      }, { status: 500 });
-    }
-
-    try {
-      // Build message array for the API call
-      const messages = [
-        { role: 'user' as const, content: message }
-      ];
-
-      // Generate unique conversation ID if not provided
-      const newConversationId = conversationId || `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      const response = await openaiService.generateResponse(messages, scenario, newConversationId);
-
-      return NextResponse.json({
-        success: true,
-        conversationId: newConversationId,
-        response: {
-          text: response,
-          timestamp: new Date().toISOString(),
-          agent: scenario ? scenario.agentConfig.name : 'Assistant',
-        },
-        agentResponse: {
-          text: response,
-          // Note: audio_url could be generated here if needed
-        }
-      });
-
-    } catch (apiError) {
-      console.error("OpenAI API Error:", apiError);
+    const body = await request.json();
+    
+    // Handle different actions
+    if (body.action === 'start-session') {
+      const { sessionId, dilemma }: { sessionId: string; dilemma?: EthicalDilemma } = body;
       
-      let errorMessage = "Error communicating with OpenAI";
-      if (apiError instanceof Error) {
-        if (apiError.message.includes("401")) {
-          errorMessage = "Invalid OpenAI API key";
-        } else if (apiError.message.includes("429")) {
-          errorMessage = "OpenAI API rate limit exceeded";
-        } else if (apiError.message.includes("quota")) {
-          errorMessage = "OpenAI API quota exceeded";
-        }
+      if (!sessionId) {
+        return NextResponse.json({
+          success: false,
+          error: "Session ID is required",
+        }, { status: 400 });
       }
 
+      if (!openaiService) {
+        return NextResponse.json({
+          success: false,
+          error: "OpenAI service not available",
+        }, { status: 500 });
+      }
+
+      const session = await openaiService.startCoachingSession(sessionId);
+      
       return NextResponse.json({
-        success: false,
-        error: errorMessage,
-      }, { status: 500 });
+        success: true,
+        session
+      });
+    } else if (body.action === 'end-session') {
+      const { sessionId }: { sessionId: string } = body;
+      
+      if (!sessionId) {
+        return NextResponse.json({
+          success: false,
+          error: "Session ID is required",
+        }, { status: 400 });
+      }
+
+      openaiService?.endCoachingSession(sessionId);
+      
+      return NextResponse.json({
+        success: true,
+        message: "Session ended"
+      });
+    } else {
+      // Regular message handling
+      const { message, sessionId }: { message: string; sessionId: string } = body;
+
+      if (!message) {
+        return NextResponse.json({
+          success: false,
+          error: "Message is required",
+        }, { status: 400 });
+      }
+
+      if (!sessionId) {
+        return NextResponse.json({
+          success: false,
+          error: "Session ID is required",
+        }, { status: 400 });
+      }
+
+      if (!OPENAI_API_KEY) {
+        return NextResponse.json({
+          success: false,
+          error: "OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.",
+        }, { status: 500 });
+      }
+
+      if (!openaiService) {
+        return NextResponse.json({
+          success: false,
+          error: "OpenAI service not configured",
+        }, { status: 500 });
+      }
+
+      try {
+        const response = await openaiService.generateResponse(message, sessionId);
+
+        return NextResponse.json({
+          success: true,
+          response,
+          timestamp: new Date().toISOString(),
+        });
+
+      } catch (apiError) {
+        console.error("Professor Agent Error:", apiError);
+        
+        let errorMessage = "Error communicating with Marcus";
+        if (apiError instanceof Error) {
+          if (apiError.message.includes("401")) {
+            errorMessage = "Invalid OpenAI API key";
+          } else if (apiError.message.includes("429")) {
+            errorMessage = "OpenAI API rate limit exceeded";
+          } else if (apiError.message.includes("quota")) {
+            errorMessage = "OpenAI API quota exceeded";
+          } else {
+            errorMessage = apiError.message;
+          }
+        }
+
+        return NextResponse.json({
+          success: false,
+          error: errorMessage,
+        }, { status: 500 });
+      }
     }
 
   } catch (error) {
@@ -90,28 +124,44 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const conversationId = searchParams.get('conversationId');
+    const sessionId = searchParams.get('sessionId');
 
-    if (!conversationId) {
+    if (!sessionId) {
       return NextResponse.json({
         success: false,
-        error: "Conversation ID is required",
+        error: "Session ID is required",
       }, { status: 400 });
     }
 
-    // For simplicity, return empty conversation data
-    // In a real app, you would fetch this from a database
+    if (!openaiService) {
+      return NextResponse.json({
+        success: false,
+        error: "OpenAI service not available",
+      }, { status: 500 });
+    }
+
+    const session = openaiService.getCoachingSession(sessionId);
+    
+    if (!session) {
+      return NextResponse.json({
+        success: false,
+        error: "Session not found",
+      }, { status: 404 });
+    }
+
     return NextResponse.json({
       success: true,
-      conversation: {
-        id: conversationId,
-        messages: [],
-        created_at: new Date().toISOString(),
+      session: {
+        id: session.id,
+        dilemma: session.dilemma,
+        phases: session.phases,
+        completed: session.completed,
+        duration: session.duration
       }
     });
 
   } catch (error) {
-    console.error("Get conversation error:", error);
+    console.error("Get session error:", error);
     return NextResponse.json({
       success: false,
       error: "Internal server error",

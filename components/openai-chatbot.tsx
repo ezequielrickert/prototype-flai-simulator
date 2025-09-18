@@ -3,28 +3,28 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useOpenAIChat } from '@/hooks/use-openai-chat';
-import { TeachingScenario } from '@/lib/realtime-agent-service';
+import { EthicalDilemma } from '@/lib/professor-agent-service';
 import { ConversationFeedbackDisplay } from '@/components/conversation-feedback';
 import { Mic, MicOff, Send, Volume2, MessageCircle, GraduationCap, ChevronDown } from 'lucide-react';
 
 interface OpenAIChatbotProps {
-  scenario?: TeachingScenario;
+  dilemma?: EthicalDilemma;
   className?: string;
 }
 
 export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({ 
-  scenario, 
+  dilemma, 
   className = '' 
 }) => {
   const {
     conversation,
     isLoading,
     error,
-    currentScenario,
+    currentDilemma,
     sendMessage,
-    startNewConversation,
-    setScenario,
-    getAvailableScenarios,
+    startNewSession,
+    setDilemma,
+    getAvailableDilemmas,
     playAudio,
   } = useOpenAIChat();
 
@@ -32,27 +32,27 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [recognition, setRecognition] = useState<any>(null);
-  const [availableScenarios, setAvailableScenarios] = useState<TeachingScenario[]>([]);
-  const [showScenarios, setShowScenarios] = useState(false);
+  const [availableDilemmas, setAvailableDilemmas] = useState<EthicalDilemma[]>([]);
+  const [showDilemmas, setShowDilemmas] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [useWhisper, setUseWhisper] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load available scenarios
+  // Load available dilemmas
   useEffect(() => {
-    const loadScenarios = async () => {
-      const scenarios = await getAvailableScenarios();
-      setAvailableScenarios(scenarios);
+    const loadDilemmas = async () => {
+      const dilemmas = await getAvailableDilemmas();
+      setAvailableDilemmas(dilemmas);
     };
-    loadScenarios();
-  }, [getAvailableScenarios]);
+    loadDilemmas();
+  }, [getAvailableDilemmas]);
 
-  // Set initial scenario
+  // Set initial dilemma
   useEffect(() => {
-    if (scenario && !currentScenario) {
-      setScenario(scenario);
+    if (dilemma && !currentDilemma) {
+      setDilemma(dilemma);
     }
-  }, [scenario, currentScenario, setScenario]);
+  }, [dilemma, currentDilemma, setDilemma]);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -123,7 +123,7 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
     if (!inputMessage.trim() || isLoading) return;
 
     try {
-      const aiMessage = await sendMessage(inputMessage, currentScenario || scenario);
+      const aiMessage = await sendMessage(inputMessage);
       setInputMessage('');
       
       // Auto-play AI response if audio is available
@@ -270,19 +270,19 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
           <div>
             <CardTitle className="text-xl">OpenAI Assistant</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {currentScenario ? `Agente: ${currentScenario.agentConfig.name}` : 'Chat with AI powered by OpenAI GPT-4'}
+              {currentDilemma ? `Marcus - Coach de Ética: ${currentDilemma.title}` : 'Chat with Marcus - Coach de Ética Empresarial'}
             </p>
           </div>
           <div className="flex gap-2">
-            {currentScenario && (
-              <Badge variant="outline" className="text-xs">
-                {currentScenario.title}
+                        {currentDilemma && (
+              <Badge variant="secondary" className="ml-2">
+                {currentDilemma.category}
               </Badge>
             )}
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setShowScenarios(!showScenarios)}
+              onClick={() => setShowDilemmas(!showDilemmas)}
             >
               <GraduationCap className="w-4 h-4 mr-1" />
               Select Agent
@@ -291,7 +291,7 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => startNewConversation()}
+              onClick={() => startNewSession()}
             >
               New Chat
             </Button>
@@ -301,24 +301,24 @@ export const OpenAIChatbot: React.FC<OpenAIChatbotProps> = ({
 
       <CardContent className="p-0">
         {/* Scenario Selection */}
-        {showScenarios && (
+        {showDilemmas && (
           <div className="p-4 border-b bg-muted/30">
             <h3 className="text-sm font-medium mb-3">Selecciona un Agente Especializado:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {availableScenarios.map((s) => (
+              {availableDilemmas.map((d) => (
                 <Button
-                  key={s.id}
-                  variant={currentScenario?.id === s.id ? "default" : "outline"}
+                  key={d.id}
+                  variant={currentDilemma?.id === d.id ? "default" : "outline"}
                   size="sm"
                   onClick={() => {
-                    setScenario(s);
-                    setShowScenarios(false);
+                    setDilemma(d);
+                    setShowDilemmas(false);
                   }}
                   className="justify-start text-left h-auto p-3"
                 >
                   <div>
-                    <div className="font-medium text-sm">{s.title}</div>
-                    <div className="text-xs text-muted-foreground">{s.description}</div>
+                    <div className="font-medium text-sm">{d.title}</div>
+                    <div className="text-xs text-muted-foreground">{d.scenario}</div>
                   </div>
                 </Button>
               ))}

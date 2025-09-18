@@ -1,32 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { realtimeAgentService } from '@/lib/realtime-agent-service';
+import { professorAgentService } from '@/lib/professor-agent-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const { conversationId, timeWindowSeconds = 30 } = await request.json();
+    const { sessionId } = await request.json();
 
-    if (!conversationId) {
+    if (!sessionId) {
       return NextResponse.json(
-        { error: 'conversationId is required' },
+        { error: 'sessionId is required' },
         { status: 400 }
       );
     }
 
-    if (!realtimeAgentService) {
+    if (!professorAgentService) {
       return NextResponse.json(
-        { error: 'Agent service not available' },
+        { error: 'Professor agent service not available' },
         { status: 500 }
       );
     }
 
-    const feedback = await realtimeAgentService.generateConversationFeedback(
-      conversationId,
-      timeWindowSeconds
-    );
+    const feedback = await professorAgentService.generateSessionFeedback(sessionId);
 
     if (!feedback) {
       return NextResponse.json(
-        { error: 'No recent conversation found or no agent configured' },
+        { error: 'Session not found or not completed yet' },
         { status: 404 }
       );
     }
@@ -37,7 +34,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating conversation feedback:', error);
+    console.error('Error generating session feedback:', error);
     return NextResponse.json(
       { error: 'Failed to generate feedback' },
       { status: 500 }
@@ -48,35 +45,47 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const conversationId = searchParams.get('conversationId');
+    const sessionId = searchParams.get('sessionId');
 
-    if (!conversationId) {
+    if (!sessionId) {
       return NextResponse.json(
-        { error: 'conversationId is required' },
+        { error: 'sessionId is required' },
         { status: 400 }
       );
     }
 
-    if (!realtimeAgentService) {
+    if (!professorAgentService) {
       return NextResponse.json(
-        { error: 'Agent service not available' },
+        { error: 'Professor agent service not available' },
         { status: 500 }
       );
     }
 
-    const allFeedback = realtimeAgentService.getConversationFeedback(conversationId);
-    const latestFeedback = realtimeAgentService.getLatestFeedback(conversationId);
+    const session = professorAgentService.getSession(sessionId);
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      allFeedback,
-      latestFeedback
+      session: {
+        id: session.id,
+        dilemma: session.dilemma,
+        phases: session.phases,
+        feedback: session.feedback,
+        completed: session.completed,
+        duration: session.duration
+      }
     });
 
   } catch (error) {
-    console.error('Error retrieving conversation feedback:', error);
+    console.error('Error retrieving session information:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve feedback' },
+      { error: 'Failed to retrieve session information' },
       { status: 500 }
     );
   }

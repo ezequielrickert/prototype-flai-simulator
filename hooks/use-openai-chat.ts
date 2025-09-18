@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { TeachingScenario } from '@/lib/realtime-agent-service';
+import { EthicalDilemma, CoachingSession } from '@/lib/professor-agent-service';
 
 export interface OpenAIMessage {
   id: string;
@@ -13,23 +13,25 @@ export interface OpenAIConversation {
   id: string;
   messages: OpenAIMessage[];
   isActive: boolean;
-  scenario?: TeachingScenario;
+  dilemma?: EthicalDilemma;
+  sessionId?: string;
 }
 
 export const useOpenAIChat = () => {
   const [conversation, setConversation] = useState<OpenAIConversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentScenario, setCurrentScenario] = useState<TeachingScenario | null>(null);
+  const [currentDilemma, setCurrentDilemma] = useState<EthicalDilemma | null>(null);
+  const [currentSession, setCurrentSession] = useState<CoachingSession | null>(null);
 
-  const sendMessage = useCallback(async (message: string, scenario?: TeachingScenario) => {
+  const sendMessage = useCallback(async (message: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Update current scenario if provided
-      if (scenario) {
-        setCurrentScenario(scenario);
+      // Make sure we have an active session
+      if (!currentSession) {
+        throw new Error('No active coaching session. Please start a new session first.');
       }
 
       const response = await fetch('/api/openai-chat', {
@@ -39,8 +41,7 @@ export const useOpenAIChat = () => {
         },
         body: JSON.stringify({
           message,
-          conversationId: conversation?.id,
-          scenario: scenario || currentScenario,
+          sessionId: currentSession.id,
         }),
       });
 
@@ -50,128 +51,196 @@ export const useOpenAIChat = () => {
         throw new Error(data.error || 'Failed to send message');
       }
 
+      // Update conversation with new messages
       const userMessage: OpenAIMessage = {
-        id: `msg_${Date.now()}_user`,
+        id: `user-${Date.now()}`,
         text: message,
         speaker: 'user',
         timestamp: new Date(),
       };
 
-      const aiMessage: OpenAIMessage = {
-        id: `msg_${Date.now()}_ai`,
-        text: data.agentResponse.text,
+      const assistantMessage: OpenAIMessage = {
+        id: `assistant-${Date.now()}`,
+        text: data.response,
         speaker: 'assistant',
         timestamp: new Date(),
-        audioUrl: data.agentResponse.audio_url,
+        audioUrl: data.audioUrl,
       };
 
       setConversation(prev => {
-        if (prev && prev.id === data.conversationId) {
+        if (!prev) {
           return {
-            ...prev,
-            messages: [...prev.messages, userMessage, aiMessage],
-            scenario: scenario || currentScenario || prev.scenario,
-          };
-        } else {
-          // Create new conversation
-          return {
-            id: data.conversationId,
-            messages: [userMessage, aiMessage],
+            id: currentSession.id,
+            messages: [userMessage, assistantMessage],
             isActive: true,
-            scenario: scenario || currentScenario || undefined,
+            dilemma: currentSession.dilemma,
+            sessionId: currentSession.id,
           };
         }
+        return {
+          ...prev,
+          messages: [...prev.messages, userMessage, assistantMessage],
+        };
       });
 
-      return aiMessage;
+      return assistantMessage;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [conversation?.id, currentScenario]);
+  }, [currentSession]);
 
-  const startNewConversation = useCallback((scenario?: TeachingScenario) => {
-    setConversation(null);
+  const startNewSession = useCallback(async (dilemma?: EthicalDilemma) => {
+    setIsLoading(true);
     setError(null);
-    if (scenario) {
-      setCurrentScenario(scenario);
+
+    try {
+      const sessionId = `session-${Date.now()}`;
+      
+      const response = await fetch('/api/openai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'start-session',
+          sessionId,
+          dilemma,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to start session');
+      }
+
+      // Set the current session and dilemma
+      setCurrentSession(data.session);
+      setCurrentDilemma(data.session.dilemma);
+
+      // Create initial conversation with Marcus's opening
+      const initialMessage: OpenAIMessage = {
+        id: `assistant-${Date.now()}`,
+        text: data.session.messages[0]?.content || 'Hola, soy Marcus. Comencemos con nuestra sesión de coaching ético de hoy.',
+        speaker: 'assistant',
+        timestamp: new Date(),
+      };
+
+      setConversation({
+        id: sessionId,
+        messages: [initialMessage],
+        isActive: true,
+        dilemma: data.session.dilemma,
+        sessionId,
+      });
+
+      return data.session;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  const setScenario = useCallback((scenario: TeachingScenario) => {
-    setCurrentScenario(scenario);
-    // If there's an active conversation, update its scenario
-    setConversation(prev => prev ? { ...prev, scenario } : null);
+  const setDilemma = useCallback((dilemma: EthicalDilemma) => {
+    setCurrentDilemma(dilemma);
   }, []);
 
-  const getAvailableScenarios = useCallback(async () => {
+  const getAvailableDilemmas = useCallback(async (): Promise<EthicalDilemma[]> => {
     try {
       const response = await fetch('/api/scenarios');
       const data = await response.json();
-      return data.scenarios || [];
-    } catch (error) {
-      console.error('Error fetching scenarios:', error);
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch dilemmas');
+      }
+      
+      return data.dilemmas || [];
+    } catch (err) {
+      console.error('Error fetching dilemmas:', err);
       return [];
     }
   }, []);
 
-  const playAudio = useCallback(async (text: string, voice?: string) => {
+  const playAudio = useCallback(async (text: string) => {
     try {
       const response = await fetch('/api/text-to-speech', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text, voice }),
+        body: JSON.stringify({ text }),
       });
 
-      const data = await response.json();
-
-      if (data.success && data.audioUrl) {
-        const audio = new Audio(data.audioUrl);
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
         await audio.play();
-        return true;
-      } else {
-        console.warn('Failed to generate audio:', data.message);
-        return false;
       }
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      return false;
+    } catch (err) {
+      console.error('Error playing audio:', err);
     }
+  }, []);
+
+  const clearConversation = useCallback(() => {
+    setConversation(null);
+    setCurrentSession(null);
+    setCurrentDilemma(null);
+    setError(null);
   }, []);
 
   const getConversation = useCallback(async (conversationId: string) => {
     try {
-      const response = await fetch(`/api/openai-chat?conversationId=${conversationId}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setConversation({
-          id: data.conversation.id,
-          messages: data.conversation.messages || [],
-          isActive: true,
-        });
+      // This would typically fetch conversation history from the server
+      // For now, return the current conversation if IDs match
+      if (conversation?.id === conversationId) {
+        return conversation;
       }
-    } catch (error) {
-      console.error('Error fetching conversation:', error);
-      setError('Failed to load conversation');
+      return null;
+    } catch (err) {
+      console.error('Error fetching conversation:', err);
+      return null;
     }
-  }, []);
+  }, [conversation]);
+
+  const endSession = useCallback(() => {
+    if (currentSession) {
+      // End the session on the server
+      fetch('/api/openai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'end-session',
+          sessionId: currentSession.id,
+        }),
+      }).catch(console.error);
+    }
+    
+    clearConversation();
+  }, [currentSession, clearConversation]);
 
   return {
     conversation,
     isLoading,
     error,
-    currentScenario,
+    currentDilemma,
+    currentSession,
     sendMessage,
-    startNewConversation,
-    setScenario,
-    getAvailableScenarios,
+    startNewSession,
+    setDilemma,
+    getAvailableDilemmas,
     playAudio,
+    clearConversation,
     getConversation,
+    endSession,
   };
 };

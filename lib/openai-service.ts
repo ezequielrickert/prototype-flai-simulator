@@ -1,4 +1,4 @@
-import { realtimeAgentService, RealtimeAgentService, TeachingScenario } from './realtime-agent-service';
+import { professorAgentService, ProfessorAgentService, EthicalDilemma } from './professor-agent-service';
 
 export interface OpenAIMessage {
   id: string;
@@ -12,17 +12,18 @@ export interface OpenAIConversation {
   id: string;
   messages: OpenAIMessage[];
   isActive: boolean;
-  scenario?: TeachingScenario;
+  dilemma?: EthicalDilemma;
+  sessionId?: string;
 }
 
 export class OpenAIService {
   private apiKey: string;
   private baseUrl = "https://api.openai.com/v1";
-  private agentService: RealtimeAgentService | null;
+  private agentService: ProfessorAgentService | null;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
-    this.agentService = realtimeAgentService;
+    this.agentService = professorAgentService;
   }
 
   private getHeaders() {
@@ -32,42 +33,39 @@ export class OpenAIService {
     };
   }
 
-  // Set the current agent based on scenario
-  setAgent(scenario: TeachingScenario) {
+  // Start a new coaching session
+  async startCoachingSession(sessionId: string) {
     if (this.agentService) {
-      this.agentService.setAgent(scenario);
+      return await this.agentService.startNewSession(sessionId);
     }
+    throw new Error('Professor agent service not available');
   }
 
-  // Generate text using the configured agent with conversation history
+  // Generate response using the professor agent with session context
   async generateResponse(
-    messages: Array<{role: 'user' | 'assistant' | 'system', content: string}>, 
-    scenario?: TeachingScenario,
-    conversationId?: string
+    userMessage: string,
+    sessionId: string
   ) {
     try {
-      // If scenario is provided, set the agent
-      if (scenario && this.agentService) {
-        this.agentService.setAgent(scenario);
-        return await this.agentService.generateResponse(messages, conversationId);
+      // Use professor agent service if available
+      if (this.agentService) {
+        return await this.agentService.processUserResponse(sessionId, userMessage);
       }
 
       // Fallback to direct OpenAI API call
-      const systemPrompt = "You are an AI assistant for ethics and anti-corruption training. Provide helpful, educational responses in Spanish.";
-
-      const messagesWithSystem = [
-        { role: 'system' as const, content: systemPrompt },
-        ...messages
-      ];
+      const systemPrompt = "Eres Marcus, un coach de ética empresarial reflexivo y profesional que ayuda a desarrollar habilidades de toma de decisiones éticas.";
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
           model: 'gpt-4',
-          messages: messagesWithSystem,
-          max_tokens: 1000,
-          temperature: 0.7,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMessage }
+          ],
+          max_tokens: 800,
+          temperature: 0.8,
         }),
       });
 
@@ -83,11 +81,11 @@ export class OpenAIService {
     }
   }
 
-  // Generate speech from text using configured agent or default voice
+  // Generate speech from text using Marcus's voice
   async textToSpeech(text: string, voice?: string): Promise<ArrayBuffer> {
     try {
-      // Use agent service if available and agent is configured
-      if (this.agentService && this.agentService.getCurrentAgent()) {
+      // Use professor agent service if available
+      if (this.agentService) {
         return await this.agentService.textToSpeech(text);
       }
 
@@ -98,9 +96,9 @@ export class OpenAIService {
         body: JSON.stringify({
           model: 'tts-1-hd', // Use HD model for better Spanish pronunciation
           input: text,
-          voice: voice || 'echo', // Echo is a professional male voice
+          voice: voice || 'onyx', // Use Marcus's voice by default
           response_format: 'mp3',
-          speed: 0.9, // Slightly slower for clearer Spanish pronunciation
+          speed: 0.85, // Slightly slower for coaching tone
         }),
       });
 
@@ -117,7 +115,7 @@ export class OpenAIService {
 
   // Get current agent info
   getCurrentAgent() {
-    return this.agentService?.getCurrentAgent();
+    return this.agentService?.getAgentConfig();
   }
 
   // Transcribe audio using OpenAI Whisper
@@ -160,32 +158,43 @@ export class OpenAIService {
     ];
   }
 
-  // Get available teaching scenarios
-  getAvailableScenarios(): TeachingScenario[] {
-    return RealtimeAgentService.getAvailableScenarios();
+  // Get available ethical dilemmas
+  getAvailableDilemmas(): EthicalDilemma[] {
+    if (this.agentService) {
+      return this.agentService.getAvailableDilemmas();
+    }
+    return [];
   }
 
-  // Get conversation history
-  getConversationHistory(conversationId: string) {
+  // Get coaching session details
+  getCoachingSession(sessionId: string) {
     if (this.agentService) {
-      return this.agentService.getConversationHistory(conversationId);
+      return this.agentService.getSession(sessionId);
     }
     return undefined;
   }
 
-  // Clear conversation history
-  clearConversationHistory(conversationId: string) {
+  // End a coaching session
+  endCoachingSession(sessionId: string) {
     if (this.agentService) {
-      this.agentService.clearConversationHistory(conversationId);
+      this.agentService.endSession(sessionId);
     }
   }
 
-  // Get all conversation IDs
-  getAllConversationIds(): string[] {
+  // Get all active sessions
+  getAllActiveSessions() {
     if (this.agentService) {
-      return this.agentService.getAllConversationIds();
+      return this.agentService.getAllSessions();
     }
     return [];
+  }
+
+  // Generate session feedback
+  async generateSessionFeedback(sessionId: string) {
+    if (this.agentService) {
+      return await this.agentService.generateSessionFeedback(sessionId);
+    }
+    return null;
   }
 }
 
