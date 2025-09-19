@@ -40,12 +40,14 @@ export function ChatWindow({ conversation }: ChatWindowProps) {
           className="h-full overflow-y-auto pr-2 space-y-2"
           style={{ scrollbarWidth: 'thin' }}
         >
-          {conversation.messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
+          {conversation.messages
+            .filter((message) => message.speaker === 'assistant')
+            .map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
           
           {/* Indicador de conversación vacía */}
-          {conversation.messages.length === 0 && (
+          {conversation.messages.filter(message => message.speaker === 'assistant').length === 0 && (
             <div className="h-full flex items-center justify-center">
               <div className="text-center text-gray-400">
                 <div className="text-3xl mb-2">�</div>
