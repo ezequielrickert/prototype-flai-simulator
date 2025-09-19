@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatWindow } from "./chat-window";
+import { FeedbackModal } from "./feedback-modal";
 import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 
 export function RealtimeChatInterface() {
@@ -16,10 +17,13 @@ export function RealtimeChatInterface() {
     isConnected,
     isAIThinking,
     isAISpeaking,
+    finalFeedback,
+    showFeedbackModal,
     startConversation,
     stopConversation,
     sendTextMessage,
-    setError
+    setError,
+    closeFeedbackModal
   } = useRealtimeChat();
 
   const handleStartConversation = async () => {
@@ -38,6 +42,8 @@ export function RealtimeChatInterface() {
         return 'text-amber-600 bg-amber-50 border-amber-200';
       case 'connected':
         return 'text-green-600 bg-green-50 border-green-200';
+      case 'thinking':
+        return 'text-purple-600 bg-purple-50 border-purple-200';
       default:
         return 'text-gray-600 bg-gray-50 border-gray-200';
     }
@@ -51,6 +57,8 @@ export function RealtimeChatInterface() {
         return '🔄';
       case 'connected':
         return '🟢';
+      case 'thinking':
+        return '🧠';
       default:
         return '⚪';
     }
@@ -176,6 +184,13 @@ export function RealtimeChatInterface() {
           </CardContent>
         </Card>
       )}
+      
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        feedback={finalFeedback}
+        onClose={closeFeedbackModal}
+      />
     </div>
   );
 }

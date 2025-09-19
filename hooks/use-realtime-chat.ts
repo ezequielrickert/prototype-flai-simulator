@@ -10,6 +10,8 @@ export const useRealtimeChat = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [finalFeedback, setFinalFeedback] = useState<string | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   
   const serviceRef = useRef<OpenAIRealtimeService | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -77,6 +79,11 @@ export const useRealtimeChat = () => {
         },
         onAISpeakingStateChange: (isSpeaking: boolean) => {
           console.log('AI speaking state change:', isSpeaking);
+        },
+        onFinalFeedback: (feedback: string) => {
+          console.log('Received final feedback:', feedback);
+          setFinalFeedback(feedback);
+          setShowFeedbackModal(true);
         }
       });
       
@@ -168,6 +175,11 @@ export const useRealtimeChat = () => {
     return audioRef.current;
   }, []);
 
+  const closeFeedbackModal = useCallback(() => {
+    setShowFeedbackModal(false);
+    setFinalFeedback(null);
+  }, []);
+
   // Initialize audio element on mount
   useEffect(() => {
     createAudioElement();
@@ -189,10 +201,13 @@ export const useRealtimeChat = () => {
     isConnected,
     isAIThinking,
     isAISpeaking,
+    finalFeedback,
+    showFeedbackModal,
     startConversation,
     stopConversation,
     sendTextMessage,
     getConnectionStatus,
-    setError
+    setError,
+    closeFeedbackModal
   };
 };
