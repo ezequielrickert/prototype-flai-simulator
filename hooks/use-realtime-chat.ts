@@ -115,6 +115,10 @@ export const useRealtimeChat = () => {
             };
           }
         },
+        onMicrophoneStream: (stream: MediaStream | null) => {
+          // Connect the microphone stream to the microphone control
+          microphoneControl.setMicrophoneStream(stream);
+        },
         onTranscriptReceived: (transcript: string, isPartial: boolean) => {
           if (isPartial) {
             setCurrentTranscript(transcript);
@@ -224,6 +228,9 @@ export const useRealtimeChat = () => {
       await serviceRef.current.stopConversation();
       setConversation(prev => prev ? { ...prev, isActive: false } : null);
       setIsConnected(false);
+      
+      // Clean up microphone control
+      microphoneControl.setMicrophoneStream(null);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -307,9 +314,9 @@ export const useRealtimeChat = () => {
     setError,
     isMicrophoneMuted: microphoneControl.isMuted,
     microphoneAudioLevel: microphoneControl.audioLevel,
-    toggleMicrophone: microphoneControl,
-    muteMicrophone: microphoneControl,
-    unmuteMicrophone: microphoneControl,
+    toggleMicrophone: microphoneControl.toggleMute,
+    muteMicrophone: microphoneControl.muteMicrophone,
+    unmuteMicrophone: microphoneControl.unmuteMicrophone,
     closeFeedbackModal
   };
 };
