@@ -172,7 +172,7 @@ export function RealtimeChatInterface() {
                 )}
               </Button>
             )}
-            
+
             {/* Debug button to restart speech recognition if stuck */}
             {isConnected && !isListening && !speechRecognitionPaused && (
               <Button
@@ -186,7 +186,7 @@ export function RealtimeChatInterface() {
                 </div>
               </Button>
             )}
-            
+
             <Button
               onClick={handleStopConversation}
               disabled={isLoading || !isConnected}
@@ -224,7 +224,7 @@ export function RealtimeChatInterface() {
       </Card>
 
       {/* Chat Window */}
-      <ChatWindow 
+      <ChatWindow
         conversation={conversation}
         currentTranscript={currentTranscript}
         isListening={isListening}
@@ -238,7 +238,7 @@ export function RealtimeChatInterface() {
               <div className="text-2xl">🎤</div>
               <h3 className="font-semibold text-gray-900">¿Listo para empezar?</h3>
               <p className="text-sm text-gray-600 max-w-md mx-auto">
-                Haz clic en "Iniciar Conversación" para comenzar un chat de voz en tiempo real con Marcus, tu coach de ética empresarial. 
+                Haz clic en "Iniciar Conversación" para comenzar un chat de voz en tiempo real con Marcus, tu coach de ética empresarial.
                 Asegúrate de que tu micrófono esté habilitado y los altavoces funcionen.
               </p>
               <div className="flex justify-center gap-6 text-xs text-gray-500 mt-4">

@@ -300,6 +300,7 @@ export class OpenAIRealtimeService {
       // Set remote description with the answer from OpenAI
       const answerSdp = await response.text();
       const answer = {
+        
         type: 'answer' as RTCSdpType,
         sdp: answerSdp
       };
@@ -316,6 +317,22 @@ export class OpenAIRealtimeService {
   async stopConversation(): Promise<void> {
     try {
       this.updateStatus('Disconnecting...', 'connecting');
+
+      // Send final feedback request before closing the connection
+      if (this.dc && this.dc.readyState === 'open') {
+        const finalFeedbackRequest = {
+          "type": "response.create",
+          "response": {
+            "conversation": "default",
+            "instructions": "Por favor genera un resumen final de la retroalimentación sobre las decisiones éticas del usuario en esta sesión. Mantén el tono profesional y conciso, resaltando fortalezas y posibles áreas de mejora."
+          }
+        };
+        this.dc.send(JSON.stringify(finalFeedbackRequest));
+        console.log('Sent final feedback request');
+        
+        // Wait a moment for the response before closing
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
       if (this.dc) {
         this.dc.close();
