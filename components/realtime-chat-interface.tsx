@@ -194,7 +194,7 @@ export function RealtimeChatInterface() {
                     {isAISpeaking && (
                       <div className="flex items-center gap-1 px-2 py-1 bg-gold/20 border border-gold rounded-full animate-pulse">
                         <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
-                        <span className="text-xs text-gold font-medium">Margarita</span>
+                        <span className="text-xs text-gold font-medium">Marcus</span>
                       </div>
                     )}
                   </div>
@@ -284,15 +284,21 @@ export function RealtimeChatInterface() {
           </CardContent>
         </Card>
 
-          {/* Chat Window */}
-          <ChatWindow
-              conversation={conversation}
-              currentTranscript={currentTranscript}
-              isListening={isListening}
-          />
+          {/* Chat Window: mostrar si hay conversación y mensajes relevantes (no solo "Conversation ended") */}
+          {conversation &&
+            conversation.messages.filter(m => m.speaker !== 'system' || (m.text && !m.text.toLowerCase().includes('conversation ended'))).length > 0 && (
+              <ChatWindow
+                conversation={conversation}
+                currentTranscript={currentTranscript}
+                isListening={isListening}
+              />
+          )}
 
-        {/* Instrucciones con borde dorado y mejor contraste */}
-        {!isConnected && (
+        {/* Card de instrucciones: mostrar solo si no hay conversación, o está vacía, o solo tiene "Conversation ended" */}
+        {(!conversation ||
+          conversation.messages.length === 0 ||
+          (conversation.messages.length === 1 && conversation.messages[0].text && conversation.messages[0].text.toLowerCase().includes('conversation ended'))
+        ) && (
           <Card className="border-dashed border-2 border-gold">
             <CardContent className="pt-6">
               <div className="text-center space-y-3">

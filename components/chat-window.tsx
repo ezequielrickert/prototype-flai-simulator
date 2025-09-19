@@ -23,7 +23,7 @@ export function ChatWindow({ conversation, currentTranscript, isListening }: Cha
 
   if (!conversation) {
     return (
-      <Card className="h-96">
+      <Card className="h-120">
         <CardContent className="h-full flex items-center justify-center p-6">
           <div className="text-center text-gray-500">
             <div className="text-4xl mb-2">💬</div>
@@ -35,7 +35,7 @@ export function ChatWindow({ conversation, currentTranscript, isListening }: Cha
   }
 
   return (
-    <Card className="h-96">
+    <Card className="h-120">
       <CardContent className="h-full p-4">
         <div 
           ref={scrollRef}
