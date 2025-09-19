@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatWindow } from "./chat-window";
+import { FeedbackModal } from "./feedback-modal";
 import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 
 export function RealtimeChatInterface() {
@@ -16,20 +17,13 @@ export function RealtimeChatInterface() {
     isConnected,
     isAIThinking,
     isAISpeaking,
-    isUserSpeaking,
-    currentTranscript,
-    isListening,
-    speechRecognitionPaused,
+    finalFeedback,
+    showFeedbackModal,
     startConversation,
     stopConversation,
     sendTextMessage,
-    restartSpeechRecognition,
     setError,
-    isMicrophoneMuted,
-    microphoneAudioLevel,
-    toggleMicrophone,
-    muteMicrophone,
-    unmuteMicrophone
+    closeFeedbackModal
   } = useRealtimeChat();
 
   const handleStartConversation = async () => {
@@ -48,6 +42,8 @@ export function RealtimeChatInterface() {
         return 'text-amber-600 bg-amber-50 border-amber-200';
       case 'connected':
         return 'text-green-600 bg-green-50 border-green-200';
+      case 'thinking':
+        return 'text-purple-600 bg-purple-50 border-purple-200';
       default:
         return 'text-gray-600 bg-gray-50 border-gray-200';
     }
@@ -61,6 +57,8 @@ export function RealtimeChatInterface() {
         return '🔄';
       case 'connected':
         return '🟢';
+      case 'thinking':
+        return '🧠';
       default:
         return '⚪';
     }
@@ -77,30 +75,6 @@ export function RealtimeChatInterface() {
               {/* Activity Indicators */}
               {isConnected && (
                 <div className="flex items-center gap-2">
-                  {isMicrophoneMuted && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
-                      <div className="w-2 h-2 bg-red-500 rounded-full" />
-                      <span className="text-xs text-red-700 font-medium">Silenciado</span>
-                    </div>
-                  )}
-                  {isListening && !isMicrophoneMuted && !speechRecognitionPaused && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                      <span className="text-xs text-blue-700 font-medium">Escuchando</span>
-                    </div>
-                  )}
-                  {speechRecognitionPaused && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-yellow-50 border border-yellow-200 rounded-full">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                      <span className="text-xs text-yellow-700 font-medium">Pausado</span>
-                    </div>
-                  )}
-                  {isUserSpeaking && !isMicrophoneMuted && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-full">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-xs text-green-700 font-medium">Hablando</span>
-                    </div>
-                  )}
                   {isAIThinking && (
                     <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-full">
                       <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" />
@@ -139,53 +113,10 @@ export function RealtimeChatInterface() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  🎙️ Iniciar Conversación
+                  � Iniciar Chat con Marcus
                 </div>
               )}
             </Button>
-            
-            {/* Microphone Mute Button - Only show when connected */}
-            {isConnected && (
-              <Button
-                onClick={toggleMicrophone}
-                variant={isMicrophoneMuted ? "destructive" : "outline"}
-                className={`relative ${
-                  isMicrophoneMuted 
-                    ? "bg-red-600 hover:bg-red-700 text-white" 
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-                size="lg"
-              >
-                <div className="flex items-center gap-2">
-                  {isMicrophoneMuted ? "🔇" : "🎙️"}
-                  {isMicrophoneMuted ? "Silenciado" : "Activo"}
-                </div>
-                {/* Audio level indicator */}
-                {!isMicrophoneMuted && microphoneAudioLevel > 0 && (
-                  <div 
-                    className="absolute bottom-1 left-2 h-1 bg-green-400 rounded-full transition-all duration-100"
-                    style={{ 
-                      width: `${Math.min(microphoneAudioLevel * 100, 80)}%`,
-                      opacity: microphoneAudioLevel > 0.1 ? 1 : 0
-                    }}
-                  />
-                )}
-              </Button>
-            )}
-
-            {/* Debug button to restart speech recognition if stuck */}
-            {isConnected && !isListening && !speechRecognitionPaused && (
-              <Button
-                onClick={restartSpeechRecognition}
-                variant="outline"
-                className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                size="lg"
-              >
-                <div className="flex items-center gap-2">
-                  🔄 Reactivar Voz
-                </div>
-              </Button>
-            )}
 
             <Button
               onClick={handleStopConversation}
@@ -195,7 +126,7 @@ export function RealtimeChatInterface() {
               size="lg"
             >
               <div className="flex items-center gap-2">
-                🔴 Detener Conversación
+                🔴 Detener Chat
               </div>
             </Button>
           </div>
@@ -226,8 +157,6 @@ export function RealtimeChatInterface() {
       {/* Chat Window */}
       <ChatWindow
         conversation={conversation}
-        currentTranscript={currentTranscript}
-        isListening={isListening}
       />
 
       {/* Instructions */}
@@ -235,30 +164,33 @@ export function RealtimeChatInterface() {
         <Card className="border-dashed border-2 border-gray-200">
           <CardContent className="pt-6">
             <div className="text-center space-y-3">
-              <div className="text-2xl">🎤</div>
+              <div className="text-2xl">�</div>
               <h3 className="font-semibold text-gray-900">¿Listo para empezar?</h3>
               <p className="text-sm text-gray-600 max-w-md mx-auto">
-                Haz clic en "Iniciar Conversación" para comenzar un chat de voz en tiempo real con Marcus, tu coach de ética empresarial.
-                Asegúrate de que tu micrófono esté habilitado y los altavoces funcionen.
+                Haz clic en "Iniciar Chat con Marcus" para comenzar a recibir mensajes de voz de Marcus, 
+                tu coach de ética empresarial. Solo necesitas tus altavoces o audífonos funcionando.
               </p>
               <div className="flex justify-center gap-6 text-xs text-gray-500 mt-4">
-                <div className="flex items-center gap-1">
-                  <span>🎙️</span>
-                  <span>Acceso al micrófono requerido</span>
-                </div>
                 <div className="flex items-center gap-1">
                   <span>🔊</span>
                   <span>Salida de audio habilitada</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span>🇪🇸</span>
-                  <span>Reconocimiento de voz en español</span>
+                  <span>🤖</span>
+                  <span>Solo mensajes de Marcus</span>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
+      
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        feedback={finalFeedback}
+        onClose={closeFeedbackModal}
+      />
     </div>
   );
 }
