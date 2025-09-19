@@ -353,7 +353,7 @@ export class OpenAIRealtimeService {
 
       this.isConnected = false;
       this.updateStatus('Disconnected', 'normal');
-      this.addMessage('� Conversation ended', 'system');
+      this.addMessage('Conversation ended', 'system');
 
     } catch (error) {
       console.error('Error stopping conversation:', error);

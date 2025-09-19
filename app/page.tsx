@@ -6,10 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User, ArrowLeft, Mic} from "lucide-react"
-import { DailyQuiz } from "@/components/daily-quiz"
+import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User} from "lucide-react"
 import { ProgressChart } from "@/components/progress-chart"
-import { RealtimeChatInterface } from "@/components/realtime-chat-interface"
 
 interface UserProgress {
   currentStreak: number
@@ -27,7 +25,7 @@ export default function HomePage() {
     level: 3,
     xp: 1250,
     completedToday: false,
-    lastCompletedDate: "2024-01-14",
+    lastCompletedDate: "2025-09-18",
   })
 
   const [showQuiz, setShowQuiz] = useState(false)
@@ -37,10 +35,6 @@ export default function HomePage() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
-
-  const handleStartQuiz = () => {
-    setShowQuiz(true)
-  }
 
   const handleQuizComplete = (score: number) => {
     setUserProgress((prev) => ({
@@ -56,10 +50,6 @@ export default function HomePage() {
 
   const xpToNextLevel = userProgress.level * 500 - (userProgress.xp % 500)
   const progressToNextLevel = ((userProgress.xp % 500) / 500) * 100
-
-  if (showQuiz) {
-    return <DailyQuiz onComplete={handleQuizComplete} level={userProgress.level} />
-  }
 
   return (
     <div className="min-h-screen bg-background">

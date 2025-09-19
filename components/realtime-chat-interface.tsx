@@ -164,13 +164,25 @@ export function RealtimeChatInterface() {
                   <div className="flex items-center gap-2">
                     {isMicrophoneMuted && (
                       <div className="flex items-center gap-1 px-2 py-1 bg-red-50 border border-gold rounded-full animate-pulse">
-                        <span className="text-xs text-black font-medium">Micrófono Muted</span>
+                        <span className="text-xs text-black font-medium">Micrófono Muteado</span>
                       </div>
+                    )}
+                    {isListening && !isMicrophoneMuted && !speechRecognitionPaused && (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                            <span className="text-xs text-blue-700 font-medium">Escuchando</span>
+                        </div>
+                    )}
+                    {speechRecognitionPaused && (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-yellow-50 border border-yellow-200 rounded-full">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                            <span className="text-xs text-yellow-700 font-medium">Pausado</span>
+                        </div>
                     )}
                     {isUserSpeaking && !isMicrophoneMuted && (
                       <div className="flex items-center gap-1 px-2 py-1 bg-gold/20 border border-gold rounded-full animate-pulse">
                         <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
-                        <span className="text-xs text-gold font-medium">Tú</span>
+                        <span className="text-xs text-gold font-medium">Hablando</span>
                       </div>
                     )}
                     {isAIThinking && (
@@ -182,7 +194,7 @@ export function RealtimeChatInterface() {
                     {isAISpeaking && (
                       <div className="flex items-center gap-1 px-2 py-1 bg-gold/20 border border-gold rounded-full animate-pulse">
                         <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
-                        <span className="text-xs text-gold font-medium">IA hablando</span>
+                        <span className="text-xs text-gold font-medium">Margarita</span>
                       </div>
                     )}
                   </div>
@@ -216,16 +228,15 @@ export function RealtimeChatInterface() {
                 )}
               </Button>
               {/* Microphone Mute Button - Solo cuando está conectado */}
-              {isConnected && (
+              {isConnected && !isListening && !speechRecognitionPaused && (
                 <Button
-                  onClick={toggleMicrophone}
+                  onClick={restartSpeechRecognition}
                   variant={isMicrophoneMuted ? "destructive" : "outline"}
                   className={`relative border-gold text-gold bg-beige ${isMicrophoneMuted ? "bg-gold/60" : "bg-beige"} h-12 font-bold py-3 rounded-lg transition-all duration-200 animate-pulse`}
                   size="lg"
                 >
                   <div className="flex items-center gap-2">
-                    {isMicrophoneMuted ? "🔇" : "🎙️"}
-                    {isMicrophoneMuted ? "Micrófono Muteado" : "Micrófono Activo"}
+                      🔄 Reactivar Voz
                   </div>
                   {/* Audio level indicator */}
                   {!isMicrophoneMuted && microphoneAudioLevel > 0 && (
@@ -246,7 +257,7 @@ export function RealtimeChatInterface() {
                 size="lg"
               >
                 <div className="flex items-center gap-2">
-                  🔴 Finalizar
+                  🔴 Detener Conversación
                 </div>
               </Button>
             </div>
@@ -272,6 +283,14 @@ export function RealtimeChatInterface() {
             )}
           </CardContent>
         </Card>
+
+          {/* Chat Window */}
+          <ChatWindow
+              conversation={conversation}
+              currentTranscript={currentTranscript}
+              isListening={isListening}
+          />
+
         {/* Instrucciones con borde dorado y mejor contraste */}
         {!isConnected && (
           <Card className="border-dashed border-2 border-gold">
@@ -280,17 +299,22 @@ export function RealtimeChatInterface() {
                 <div className="text-2xl">🎤</div>
                 <h3 className="font-semibold text-gold">¿Listo para comenzar?</h3>
                 <p className="text-sm text-gray-300 max-w-md mx-auto">
-                  Haz clic en "Iniciar Conversación" para comenzar el desafío guiado de voz con IA.<br />Asegúrate de que tu micrófono esté habilitado y los parlantes funcionen.
+                  Haz clic en "Iniciar Conversación" para comenzar el desafío guiado de voz con IA.<br />
+                    Asegúrate de que tu micrófono esté habilitado y los parlantes funcionen.
                 </p>
-                <div className="flex justify-center gap-6 text-xs text-gray-300 mt-4">
-                  <div className="flex items-center gap-1">
-                    <span>🎙️</span>
-                    <span>Acceso a micrófono requerido</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>🔊</span>
-                    <span>Audio habilitado</span>
-                  </div>
+                <div className="flex justify-center gap-6 text-xs text-gray-500 mt-4">
+                    <div className="flex items-center gap-1">
+                        <span>🎙️</span>
+                        <span>Acceso al micrófono requerido</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <span>🔊</span>
+                        <span>Salida de audio habilitada</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <span>🇪🇸</span>
+                        <span>Reconocimiento de voz en español</span>
+                    </div>
                 </div>
               </div>
             </CardContent>
