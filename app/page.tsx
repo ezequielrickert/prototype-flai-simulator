@@ -1,13 +1,15 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User } from "lucide-react"
+import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User, Mic } from "lucide-react"
 import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
+import { RealtimeChatInterface } from "@/components/realtime-chat-interface"
 
 interface UserProgress {
   currentStreak: number
@@ -29,6 +31,7 @@ export default function HomePage() {
   })
 
   const [showQuiz, setShowQuiz] = useState(false)
+  const [showRealtimeChat, setShowRealtimeChat] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -38,6 +41,10 @@ export default function HomePage() {
 
   const handleStartQuiz = () => {
     setShowQuiz(true)
+  }
+
+  const handleStartRealtimeChat = () => {
+    setShowRealtimeChat(true)
   }
 
   const handleQuizComplete = (score: number) => {
@@ -57,6 +64,31 @@ export default function HomePage() {
 
   if (showQuiz) {
     return <DailyQuiz onComplete={handleQuizComplete} level={userProgress.level} />
+  }
+
+  if (showRealtimeChat) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 text-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowRealtimeChat(false)}
+              className="mb-4"
+            >
+              ← Back to Home
+            </Button>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              OpenAI Real-time Voice Chat
+            </h1>
+            <p className="text-gray-600">
+              Experience real-time voice conversation with AI using WebRTC
+            </p>
+          </div>
+          <RealtimeChatInterface />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -91,6 +123,47 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
+            {/* Real-time Chat Card */}
+            <Card className="border-2 border-green-200 dark:border-green-800 shadow-lg">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                      <Mic className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">Real-time Voice Chat</CardTitle>
+                      <CardDescription>OpenAI Realtime API - Nueva tecnología</CardDescription>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <Volume2 className="w-4 h-4 mr-1" />
+                    Nuevo
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      ✨ Conversación de Voz en Tiempo Real
+                    </h4>
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                      Experimenta la nueva tecnología de OpenAI Realtime API. Habla directamente con la IA usando
+                      WebRTC para una comunicación instantánea y natural.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleStartRealtimeChat}
+                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                  >
+                    <Mic className="w-5 h-5 mr-2" />
+                    Iniciar Chat de Voz
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             {/* Daily Challenge Card */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
@@ -168,9 +241,8 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="card-title-gold flex items-center gap-2">
                   <Target className="w-5 h-5 icon-gold" />
-                  Tu Progreso
+                  Progreso de Aprendizaje
                 </CardTitle>
-                <CardDescription>Seguimiento de tu desarrollo en los últimos 30 días</CardDescription>
               </CardHeader>
               <CardContent>
                 <ProgressChart />
@@ -201,6 +273,13 @@ export default function HomePage() {
                   <span className="chip">
                     {xpToNextLevel} XP para siguiente nivel
                   </span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Nivel {userProgress.level}</span>
+                    <span className="text-sm text-gray-500">{xpToNextLevel} XP restantes</span>
+                  </div>
+                  <Progress value={progressToNextLevel} className="h-2" />
                 </div>
               </CardContent>
             </Card>
