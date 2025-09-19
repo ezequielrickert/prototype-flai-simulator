@@ -141,7 +141,7 @@ export function RealtimeChatInterface() {
               >
                 <div className="flex items-center gap-2">
                   {isMicrophoneMuted ? "🔇" : "🎙️"}
-                  {isMicrophoneMuted ? "Muted" : "Live"}
+                  {isMicrophoneMuted ? "Unmute" : "Mute"}
                 </div>
                 {/* Audio level indicator */}
                 {!isMicrophoneMuted && microphoneAudioLevel > 0 && (
