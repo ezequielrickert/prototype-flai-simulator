@@ -8,12 +8,12 @@ import { useToast } from "@/hooks/use-toast"
 
 interface VoicePlayerProps {
   text: string
-  voiceId?: string
+  voice?: string
   autoPlay?: boolean
   className?: string
 }
 
-export function VoicePlayer({ text, voiceId = "pNInz6obpgDQGcFmaJgB", autoPlay = false, className }: VoicePlayerProps) {
+export function VoicePlayer({ text, voice = "alloy", autoPlay = false, className }: VoicePlayerProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
@@ -33,7 +33,7 @@ export function VoicePlayer({ text, voiceId = "pNInz6obpgDQGcFmaJgB", autoPlay =
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text, voiceId }),
+        body: JSON.stringify({ text, voice }),
       })
 
       const data = await response.json()
