@@ -159,8 +159,7 @@ export function RealtimeChatInterface() {
                   <div className="flex items-center gap-2">
                     {isMicrophoneMuted && (
                       <div className="flex items-center gap-1 px-2 py-1 bg-red-50 border border-gold rounded-full animate-pulse">
-                        <div className="w-2 h-2 bg-gold rounded-full" />
-                        <span className="text-xs text-gold font-medium">Micrófono Muted</span>
+                        <span className="text-xs text-black font-medium">Micrófono Muted</span>
                       </div>
                     )}
                     {isUserSpeaking && !isMicrophoneMuted && (
