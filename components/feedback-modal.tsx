@@ -145,11 +145,14 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                 <span className="font-medium">Mariana</span> • Coach de Ética Empresarial
               </div>
               <Button
-                onClick={onClose}
+                onClick={() => {
+                  onClose()
+                  window.location.href = '/'
+                }}
                 disabled={!feedback}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {feedback ? 'Continuar Desarrollo' : 'Generando...'}
+                {feedback ? 'Volver al home' : 'Redirigiendo...'}
               </Button>
             </div>
           </div>

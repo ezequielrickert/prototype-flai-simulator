@@ -241,7 +241,7 @@ export class OpenAIRealtimeService {
 
   async startConversation(): Promise<void> {
     try {
-      this.updateStatus('Connecting...', 'connecting');
+      this.updateStatus('Conectando...', 'connecting');
       
       // Create RTCPeerConnection
       this.pc = new RTCPeerConnection({
@@ -418,7 +418,7 @@ Mantén un tono constructivo, alentador pero honesto. Usa ejemplos específicos 
         await new Promise(resolve => setTimeout(resolve, 10000000)); // Aumentado a 5 segundos
       }
 
-      this.updateStatus('Disconnecting...', 'connecting');
+      this.updateStatus('Desconectando...', 'connecting');
 
       if (this.dc) {
         this.dc.close();
