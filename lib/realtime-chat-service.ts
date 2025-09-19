@@ -1,3 +1,5 @@
+import { MARCUS_PERSONALITY } from './marcus-personality';
+
 export interface RealtimeMessage {
   id: string;
   text: string;
@@ -103,7 +105,17 @@ export class OpenAIRealtimeService {
       this.dc = this.pc.createDataChannel('oai-events');
       this.dc.onopen = () => {
         console.log('Data channel opened');
-        // Removed debug message: this.addMessage('📡 Data channel connected', 'system');
+        // Send Marcus personality instructions via data channel once connected
+        if (this.dc && this.dc.readyState === 'open') {
+          const systemMessage = {
+            type: 'session.update',
+            session: {
+              instructions: MARCUS_PERSONALITY
+            }
+          };
+          this.dc.send(JSON.stringify(systemMessage));
+          console.log('Sent Marcus personality instructions');
+        }
       };
 
       this.dc.onmessage = (event) => {
