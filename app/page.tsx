@@ -123,47 +123,6 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
-            {/* Real-time Chat Card */}
-            <Card className="border-2 border-green-200 dark:border-green-800 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                      <Mic className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl">Real-time Voice Chat</CardTitle>
-                      <CardDescription>OpenAI Realtime API - Nueva tecnología</CardDescription>
-                    </div>
-                  </div>
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    <Volume2 className="w-4 h-4 mr-1" />
-                    Nuevo
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                      ✨ Conversación de Voz en Tiempo Real
-                    </h4>
-                    <p className="text-sm text-green-800 dark:text-green-200">
-                      Experimenta la nueva tecnología de OpenAI Realtime API. Habla directamente con la IA usando
-                      WebRTC para una comunicación instantánea y natural.
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={handleStartRealtimeChat}
-                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                  >
-                    <Mic className="w-5 h-5 mr-2" />
-                    Iniciar Chat de Voz
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
             {/* Daily Challenge Card */}
             <Card className="card-custom">
               <CardHeader className="pb-4">
@@ -176,7 +135,7 @@ export default function HomePage() {
                       <CardTitle className="card-title-gold flex items-center gap-2">
                         Desafío Diario
                       </CardTitle>
-                      <CardDescription>Conversación con IA - 5 minutos</CardDescription>
+                      <CardDescription>Conversación de Voz en Tiempo Real con IA- 5 minutos</CardDescription>
                     </div>
                   </div>
                   {userProgress.completedToday ? (
@@ -216,7 +175,7 @@ export default function HomePage() {
                   </div>
 
                   <Button
-                    onClick={handleStartQuiz}
+                    onClick={handleStartRealtimeChat}
                     disabled={userProgress.completedToday}
                     className={`button-beige h-12 w-full font-bold py-3 rounded-lg transition-all duration-200 ${userProgress.completedToday ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
@@ -266,19 +225,10 @@ export default function HomePage() {
                 <p className="text-sm muted">Nivel actual</p>
                 <div className="pt-2">
                   <span className="chip">
-                    {userProgress.xp} XP
-                  </span>
-                </div>
-                <div className="pt-2">
-                  <span className="chip">
                     {xpToNextLevel} XP para siguiente nivel
                   </span>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Nivel {userProgress.level}</span>
-                    <span className="text-sm text-gray-500">{xpToNextLevel} XP restantes</span>
-                  </div>
                   <Progress value={progressToNextLevel} className="h-2" />
                 </div>
               </CardContent>
@@ -295,7 +245,7 @@ export default function HomePage() {
               <CardContent className="text-center space-y-2">
                 <div className="big-number-gold">{userProgress.currentStreak}</div>
                 <div className="separator" />
-                <p className="text-sm muted">días consecutivos</p>
+                <p className="text-sm muted">Días consecutivos</p>
                 <div className="pt-2">
                   <span className="chip">
                     {userProgress.totalDays} días totales
