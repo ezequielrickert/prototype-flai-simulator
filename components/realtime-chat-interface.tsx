@@ -285,8 +285,6 @@ export function RealtimeChatInterface() {
             conversation.messages.filter(m => m.speaker !== 'system' || (m.text && !m.text.toLowerCase().includes('conversation ended'))).length > 0 && (
               <ChatWindow
                 conversation={conversation}
-                currentTranscript={currentTranscript}
-                isListening={isListening}
               />
           )}
 
