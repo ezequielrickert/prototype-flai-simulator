@@ -39,7 +39,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
   const formattedSections = feedback ? formatFeedback(feedback) : [];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <>
       <Card className="max-w-3xl max-h-[90vh] w-full overflow-hidden shadow-xl" style={{background: '#F8F8F8', color: '#000'}}>
         <CardHeader className="bg-white border-b border-[#D4AF37] px-8 py-6">
           <div className="flex items-center justify-between">
@@ -149,6 +149,6 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
           </div>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }
