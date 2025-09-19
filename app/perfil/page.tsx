@@ -1,11 +1,49 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft, Trophy, User, Award, CalendarDays, BarChart3, CheckCircle2, Star } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, User, Award, CalendarDays, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { ProgressChart } from "@/components/progress-chart"
+
+// Componente de check dorado
+function GoldCheck() {
+  return <span style={{color: '#D4AF37', fontWeight: 'bold', fontSize: '1.2em'}}>✓</span>;
+}
+
+// Componente de barra circular para puntaje de integridad
+// @ts-ignore
+function CircularProgress({ value, max = 100, size = 64, color = "#D4AF37" }) {
+  const radius = (size - 8) / 2
+  const circumference = 2 * Math.PI * radius
+  const progress = Math.min(value, max) / max
+  return (
+    <svg width={size} height={size} className="block mx-auto">
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color}
+        strokeWidth="8"
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={circumference * (1 - progress)}
+        style={{ transition: "stroke-dashoffset 0.7s cubic-bezier(.4,2,.3,1)", filter: "drop-shadow(0 0 24px #D4AF37cc)" }}
+        strokeLinecap="round"
+      />
+      <text
+        x="50%"
+        y="60%"
+        textAnchor="middle"
+        fontSize="2em"
+        fontWeight="bold"
+        fill="#fff"
+        style={{ filter: "drop-shadow(0 0 8px #fffbe6cc)" }}
+      >
+        {value}
+      </text>
+    </svg>
+  )
+}
 
 export default function PerfilPage() {
   // Datos de ejemplo, en una app real vendrían de la sesión/DB
@@ -25,24 +63,44 @@ export default function PerfilPage() {
     temasCompletados: 8,
     temasTotales: 12,
     puntajeIntegridad: 92,
+    avatar: "/placeholder-user.jpg",
     certificaciones: [
-      { nombre: "Ética Empresarial", icon: <Award className="w-5 h-5 icon-gold mr-2" /> },
-      { nombre: "Transparencia", icon: <Star className="w-5 h-5 icon-gold mr-2" /> },
-      { nombre: "Anticorrupción", icon: <CheckCircle2 className="w-5 h-5 icon-gold mr-2" /> },
+      { nombre: "Ética Empresarial", icon: "🏆" },
+      { nombre: "Transparencia", icon: "💰" },
+      { nombre: "Anticorrupción", icon: "🔒" },
     ],
     actividades: [
-      { fecha: "2025-09-17", descripcion: "Completó el tema 'Conflictos de Interés'" },
-      { fecha: "2025-09-16", descripcion: "Obtuvo certificación 'Ética Empresarial'" },
-      { fecha: "2025-09-15", descripcion: "Completó el desafío diario" },
+      { tema: "Conflictos de Interés", estado: "completado", xp: 50, tiempo: "12 min", icon: "📚" },
+      { tema: "Transparencia Financiera", estado: "progreso", xp: 0, tiempo: "5 min", icon: "🎯" },
+      { tema: "Dilemas Éticos", estado: "completado", xp: 75, tiempo: "18 min", icon: "⚖️" },
     ]
   }
+
+  // Datos adicionales exclusivos del perfil
+  const resumenDesempeno = {
+    tiempoPromedioSesion: "3 min",
+    mejorDia: "Miércoles",
+    puntajeIntegridad: user.puntajeIntegridad,
+  }
+  const historialCertificaciones = [
+    { nombre: "Ética Empresarial", icon: "⭐", nivel: 1, xp: 50, minutos: 3 },
+    { nombre: "Transparencia", icon: "🔥", nivel: 2, xp: 80, minutos: 4 },
+    { nombre: "Anticorrupción", icon: "🛡️", nivel: 3, xp: 120, minutos: 5 },
+  ]
+  const evaluacionesSupervisor = [
+    { fecha: "2025-09-10", comentario: "Excelente compromiso y ética.", puntaje: 5, nombre: "Carlos Mendoza" },
+    { fecha: "2025-08-15", comentario: "Buen trabajo en transparencia.", puntaje: 4, nombre: "Ana López" },
+    { fecha: "2025-07-10", comentario: "Gran capacidad de liderazgo.", puntaje: 5, nombre: "Carlos Mendoza" },
+    { fecha: "2025-06-05", comentario: "Sigue mejorando en comunicación.", puntaje: 3, nombre: "Ana López" },
+  ]
 
   // Formateo de fecha de ingreso
   const fechaIngreso = new Date(user.fechaIngreso)
   const fechaIngresoStr = fechaIngreso.toLocaleDateString("es-ES", { month: "short", year: "numeric" })
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background body-textura-diagonal">
+      {/* Header premium con flecha dorada en círculo y avatar grande */}
       <header className="header border-b py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -58,121 +116,124 @@ export default function PerfilPage() {
                     <p className="header-subtitle-dark">Capacitación Anti-Corrupción</p>
                   </div>
             </div>
-            <div className="flex items-center gap-4">
-                <div>
-                    <h1 className="header-title-dark">Perfil</h1>
-                    <p className="header-subtitle">Datos personales y progreso</p>
-                </div>
-            </div>
+              <div className="flex items-center gap-4">
+                  <div className="rounded-full bg-beige border-2 border-gold shadow-lg w-20 h-20 flex items-center justify-center">
+                      <User className="w-16 h-16 icon-gold perfil-icon" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                      <span className="font-extrabold text-2xl text-gold leading-tight">{user.nombre}</span>
+                      <span className="font-semibold text-lg text-cream">{user.departamento}</span>
+                      <span className="text-base text-cream">{user.email}</span>
+                  </div>
+              </div>
           </div>
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
-        {/* Sección superior: Info personal/profesional */}
-        <Card className="card-custom mb-8">
-          <CardHeader className="pb-2">
-            <CardTitle className="card-title-gold flex items-center gap-2">
-              <User className="w-7 h-7 icon-gold" />
-              {user.nombre}
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-400">{user.email}</CardDescription>
+        {/* Resumen de desempeño rediseñado */}
+        <Card className="card-custom shadow-lg flex flex-col p-8 mb-10">
+          <CardHeader>
+            <CardTitle className="card-title-gold flex items-center gap-2">Resumen de desempeño</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4 items-center text-base">
-              <span className="chip">{user.cargo} - Dept. {user.departamento}</span>
-              <span className="chip">ID: {user.idEmpleado}</span>
-              <span className="chip">Ingreso: {fechaIngresoStr}</span>
-              <span className="chip">Supervisor: {user.supervisor}</span>
+          <CardContent className="w-full">
+            <div className="flex flex-col gap-8">
+              {/* GAP entre título y contenido */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-4">
+                <div className="flex flex-col items-center md:items-start gap-4">
+                  {/* Solo el círculo dorado, sin fondo cuadrado y sin texto superpuesto extra */}
+                  <div className="flex items-center justify-center" style={{height: '110px', width: '110px', background: 'none'}}>
+                    <CircularProgress value={resumenDesempeno.puntajeIntegridad} max={100} size={110} color="#D4AF37" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-6 justify-center">
+                  <div className="text-lg font-semibold text-cream">Tiempo promedio por sesión: <span className="text-gold font-bold">{resumenDesempeno.tiempoPromedioSesion}</span></div>
+                  <div className="text-lg font-semibold text-cream">Mejor día: <span className="text-gold font-bold">{resumenDesempeno.mejorDia}</span></div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
-        {/* Sección central: Métricas en tarjetas doradas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-          <Card className="card-custom hover:shadow-gold transition duration-200">
-            <CardContent className="flex flex-col items-center py-6">
-              <div className="big-number-gold">{user.nivel}</div>
-              <div className="separator" />
-              <span className="muted">Nivel actual</span>
-            </CardContent>
-          </Card>
-          <Card className="card-custom hover:shadow-gold transition duration-200">
-            <CardContent className="flex flex-col items-center py-6">
-              <div className="big-number-gold">{user.xp}</div>
-              <div className="separator" />
-              <span className="muted">XP acumulado</span>
-            </CardContent>
-          </Card>
-          <Card className="card-custom hover:shadow-gold transition duration-200">
-            <CardContent className="flex flex-col items-center py-6">
-              <div className="big-number-gold">{user.racha}</div>
-              <div className="separator" />
-              <span className="muted">Racha actual</span>
-              <span className="chip mt-2">Mejor racha: {user.mejorRacha}</span>
-            </CardContent>
-          </Card>
-          <Card className="card-custom hover:shadow-gold transition duration-200">
-            <CardContent className="flex flex-col items-center py-6">
-              <div className="big-number-gold">{user.totalDias}</div>
-              <div className="separator" />
-              <span className="muted">Días totales</span>
-            </CardContent>
-          </Card>
-        </div>
-        {/* Sección inferior: Progreso detallado */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <Card className="card-custom">
+        {/* Historial y últimas actividades en la misma fila */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+          {/* Historial de certificaciones horizontal */}
+          <Card className="card-custom shadow-lg p-8 flex flex-col justify-center">
             <CardHeader>
-              <CardTitle className="card-title-gold flex items-center gap-2">
-                <BarChart3 className="w-6 h-6 icon-gold" />
-                Progreso mensual
-              </CardTitle>
+              <CardTitle className="card-title-gold flex items-center gap-2">Historial de certificaciones</CardTitle>
             </CardHeader>
             <CardContent>
-              <ProgressChart />
-            </CardContent>
-          </Card>
-          <Card className="card-custom">
-            <CardHeader>
-              <CardTitle className="card-title-gold flex items-center gap-2">
-                <Award className="w-6 h-6 icon-gold" />
-                Certificaciones y logros
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-3 mb-4">
-                {user.certificaciones.map((cert, idx) => (
-                  <span key={idx} className="chip flex items-center">
-                    {cert.icon}
-                    {cert.nombre}
-                  </span>
+              <div className="flex flex-col gap-6 mt-4">
+                {historialCertificaciones.map((cert, idx) => (
+                  <div key={idx} className="flex items-center gap-4 p-2 rounded-xl card-brown-bg shadow-md">
+                    <span className="text-2xl" style={{minWidth: '2.2em', textAlign: 'center'}}>{cert.icon}</span>
+                    <span className="font-semibold text-lg text-cream flex-1">{cert.nombre}</span>
+                    <span className="nivel-tag">Nivel {cert.nivel}</span>
+                    <span className="font-bold text-brown-dark text-base ml-2">+{cert.xp} XP</span>
+                    <span className="font-bold text-brown-dark text-base ml-2">{cert.minutos} min</span>
+                  </div>
                 ))}
               </div>
-              <div className="chip mb-2">
-                Puntaje de integridad: <span className="font-bold ml-2 text-gold">{user.puntajeIntegridad}/100</span>
-              </div>
-              <div className="chip mb-2">
-                Temas completados: {user.temasCompletados} / {user.temasTotales}
+            </CardContent>
+          </Card>
+          {/* Últimas actividades horizontal */}
+          <Card className="card-custom shadow-lg p-8 flex flex-col justify-center">
+            <CardHeader>
+              <CardTitle className="card-title-gold flex items-center gap-2">
+                <CalendarDays className="w-6 h-6 icon-gold" />
+                Últimas actividades
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-6 mt-4">
+                {user.actividades.map((act, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex items-center gap-4 proximo-tema-item transition-all duration-200 hover:shadow-gold hover:scale-[1.02] ${act.estado === "completado" ? "bg-beige" : "bg-background"}`}
+                    style={{padding: '0.7em 1em'}}
+                  >
+                    <span className="text-2xl">
+                      {act.icon === "📚" ? <BarChart3 className="w-6 h-6 icon-gold" />
+                        : act.icon === "🎯" ? <Award className="w-6 h-6 icon-gold" />
+                        : act.icon === "⚖️" ? <User className="w-6 h-6 icon-gold" />
+                        : act.icon}
+                    </span>
+                    <div className="flex flex-col flex-1">
+                      <span className="font-bold text-base">{act.tema}</span>
+                      <span className="text-xs muted">{act.estado === "completado" ? "Completado" : "En progreso"}</span>
+                    </div>
+                    {act.xp > 0 && (
+                      <span className="font-bold text-brown-dark text-base ml-2">+{act.xp} XP</span>
+                    )}
+                    <span className="font-bold text-brown-dark text-base ml-2">{Math.min(Number(act.tiempo.split(' ')[0]), 5)} min</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </div>
-        {/* Últimas actividades */}
-        <Card className="card-custom">
+        {/* Evaluaciones del supervisor en grid 2 columnas */}
+        <Card className="card-custom shadow-lg border-2 border-gold p-8 mb-10">
           <CardHeader>
             <CardTitle className="card-title-gold flex items-center gap-2">
-              <CalendarDays className="w-6 h-6 icon-gold" />
-              Últimas actividades
+              Evaluaciones del supervisor
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
-              {user.actividades.map((act, idx) => (
-                <li key={idx} className="flex items-center gap-3 proximo-tema-item">
-                  <span className="chip">{act.fecha}</span>
-                  <span className="muted">{act.descripcion}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+              {evaluacionesSupervisor.map((ev, idx) => {
+                const fecha = new Date(ev.fecha)
+                const mesAnio = fecha.toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+                const inicial = ev.nombre ? ev.nombre[0].toUpperCase() : "S"
+                return (
+                  <div key={idx} className="flex items-center gap-4 p-4 rounded-lg bg-beige/40 border border-gold card-custom shadow-md" style={{border: '2px solid #D4AF37'}}>
+                    <span className="rounded-full bg-gold text-black font-bold w-10 h-10 flex items-center justify-center" style={{fontSize: '1.3em'}}>{inicial}</span>
+                    <div className="flex flex-col flex-1 gap-2">
+                      <span className="text-sm muted mb-1" style={{fontWeight: 600}}>{ev.nombre} · {mesAnio.charAt(0).toUpperCase() + mesAnio.slice(1)}</span>
+                      <span className="muted text-base">{ev.comentario}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
       </main>
