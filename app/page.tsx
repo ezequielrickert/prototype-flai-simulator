@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User, Mic } from "lucide-react"
+import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Unlock, TvMinimalPlay, User, ArrowLeft } from "lucide-react"
 import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
 import { RealtimeChatInterface } from "@/components/realtime-chat-interface"
@@ -31,7 +31,6 @@ export default function HomePage() {
   })
 
   const [showQuiz, setShowQuiz] = useState(false)
-  const [showRealtimeChat, setShowRealtimeChat] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -41,10 +40,6 @@ export default function HomePage() {
 
   const handleStartQuiz = () => {
     setShowQuiz(true)
-  }
-
-  const handleStartRealtimeChat = () => {
-    setShowRealtimeChat(true)
   }
 
   const handleQuizComplete = (score: number) => {
@@ -64,31 +59,6 @@ export default function HomePage() {
 
   if (showQuiz) {
     return <DailyQuiz onComplete={handleQuizComplete} level={userProgress.level} />
-  }
-
-  if (showRealtimeChat) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6 text-center">
-            <Button
-              variant="outline"
-              onClick={() => setShowRealtimeChat(false)}
-              className="mb-4"
-            >
-              ← Back to Home
-            </Button>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              OpenAI Real-time Voice Chat
-            </h1>
-            <p className="text-gray-600">
-              Experience real-time voice conversation with AI using WebRTC
-            </p>
-          </div>
-          <RealtimeChatInterface />
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -175,21 +145,23 @@ export default function HomePage() {
                   </div>
 
                   <Button
-                    onClick={handleStartRealtimeChat}
+                    asChild
                     disabled={userProgress.completedToday}
                     className={`button-beige h-12 w-full font-bold py-3 rounded-lg transition-all duration-200 ${userProgress.completedToday ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    {userProgress.completedToday ? (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                        Completado por Hoy
-                      </>
-                    ) : (
-                      <>
-                        <Volume2 className="w-5 h-5 mr-2" />
-                        Iniciar Conversación
-                      </>
-                    )}
+                    <Link href="/chat">
+                      {userProgress.completedToday ? (
+                        <>
+                          <CheckCircle2 className="w-5 h-5 mr-2" />
+                          Completado por Hoy
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-5 h-5 mr-2" />
+                          Iniciar Conversación
+                        </>
+                      )}
+                    </Link>
                   </Button>
                 </div>
               </CardContent>

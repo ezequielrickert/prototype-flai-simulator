@@ -301,10 +301,6 @@
     box-shadow: 0 0 16px 2px #D4AF37aa;
   }
 
-  /* --- Fin de personalizaciones --- */
-
-  /* --- Refinamientos premium y opciones de textura --- */
-
   .card-custom {
     box-shadow:
       0 2px 8px 0 rgba(212,175,55,0.10),
@@ -340,7 +336,6 @@
     background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="20,5 35,15 35,35 20,45 5,35 5,15" stroke="%23D4AF37" stroke-width="1" stroke-opacity="0.04" fill="none"/></svg>');
     background-size: 40px 40px;
   }
-  /* Para cambiar la textura, pon la clase correspondiente en el body: body-textura-diagonal, body-textura-puntos o body-textura-hexagonos */
 
   .badge {
     border-radius: 1.5em;
@@ -367,9 +362,6 @@
     100% { text-shadow: 0 0 48px #D4AF37ee, 0 0 16px #fffbe6cc; }
   }
 
-  /* --- Fin refinamientos premium --- */
-
-  /* Número grande dorado con animación de glow */
     .big-number-gold {
       font-size: 3rem;
       font-weight: 900;
@@ -386,5 +378,17 @@
     @keyframes hoverGlow {
         0% { box-shadow: 0 0 32px #D4AF37cc, 0 0 12px #fffbe6aa; }
         100% { box-shadow: 0 0 64px #D4AF37ee, 0 0 24px #fffbe6cc; }
+    }
+
+    .chat-icon {
+        color: var(--cream);
+        border-radius: 20%;
+        box-shadow: 0 2px 8px 0 rgba(212,175,55,0.18);
+        padding: 0.3em;
+        transition: box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .chat-icon:hover {
+        box-shadow: 0 0 16px 2px #D4AF37aa;
     }
 }
