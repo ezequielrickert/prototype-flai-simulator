@@ -208,7 +208,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
       speechSynthesis.cancel()
 
       const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = "es-AR" // Específicamente argentino
+      utterance.lang = "es-419" // Español latinoamericano
       utterance.rate = 0.85 // Velocidad natural argentina
       utterance.pitch = 1.0 // Pitch neutro
       utterance.volume = 0.9
@@ -216,7 +216,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
       const voices = speechSynthesis.getVoices()
       const argentineVoice = voices.find(
         (voice) =>
-          (voice.lang.includes("es-AR") || voice.lang.includes("es-MX") || voice.lang.includes("es-CO")) &&
+          (voice.lang.includes("es-419") || voice.lang.includes("es-MX") || voice.lang.includes("es-CO") || voice.lang.includes("es-AR") || voice.lang.includes("es-CL")) &&
           (voice.name.includes("Google") || voice.name.includes("Microsoft") || voice.name.includes("Natural")),
       )
       if (argentineVoice) {
@@ -317,7 +317,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
 
       recognitionInstance.continuous = false // Mantener false para evitar errores de red
       recognitionInstance.interimResults = true
-      recognitionInstance.lang = "es-ES"
+      recognitionInstance.lang = "es-419" // Español latinoamericano
       recognitionInstance.maxAlternatives = 1
 
       // Configuraciones mejoradas para reducir errores de red
@@ -792,35 +792,35 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
       console.log("[v0] TTS API response data:", data)
 
       if (data.success && data.audioUrl) {
-        console.log("[v0] Using ElevenLabs audio")
+        console.log("[v0] Using OpenAI audio")
         const audio = new Audio(data.audioUrl)
 
         audio.onerror = (error) => {
-          console.error("[v0] ElevenLabs audio playback error:", error)
+          console.error("[v0] OpenAI audio playback error:", error)
           setIsAISpeaking(false)
           resumeMicAfterAI() // Reanudar micrófono en caso de error
           toast({
             title: "Error de reproducción",
-            description: "Error con ElevenLabs. El micrófono se ha reactivado.",
+            description: "Error con OpenAI. El micrófono se ha reactivado.",
             variant: "destructive",
           })
         }
 
         audio.onended = () => {
-          console.log("[v0] ElevenLabs audio playback ended")
+          console.log("[v0] OpenAI audio playback ended")
           setIsAISpeaking(false)
           resumeMicAfterAI() // Reanudar micrófono cuando termine el audio
         }
 
         // Asegurar que el audio se cargue antes de reproducir
         audio.oncanplaythrough = () => {
-          console.log("[v0] ElevenLabs audio ready to play")
+          console.log("[v0] OpenAI audio ready to play")
         }
 
         await audio.play()
-        console.log("[v0] ElevenLabs audio playback started")
+        console.log("[v0] OpenAI audio playback started")
       } else {
-        console.log("[v0] ElevenLabs failed:", data.message)
+        console.log("[v0] OpenAI failed:", data.message)
         console.log("[v0] Falling back to browser speech synthesis")
         
         // Usar browser speech como fallback
@@ -828,8 +828,8 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
         playBrowserSpeech(text)
 
         toast({
-          title: "ElevenLabs Error",
-          description: data.message || "Error de ElevenLabs. Usando síntesis del navegador.",
+          title: "OpenAI Error",
+          description: data.message || "Error de OpenAI. Usando síntesis del navegador.",
           variant: "default",
         })
       }
@@ -842,7 +842,7 @@ export function PhoneInterface({ onComplete, level, scenario }: PhoneInterfacePr
       
       toast({
         title: "Error de conexión",
-        description: "No se pudo conectar con ElevenLabs. Usando síntesis del navegador.",
+        description: "No se pudo conectar con OpenAI. Usando síntesis del navegador.",
         variant: "default",
       })
     }
