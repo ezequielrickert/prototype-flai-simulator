@@ -128,8 +128,6 @@ export const useRealtimeChat = () => {
         onFinalFeedback: (feedback: string) => {
           console.log('Received final feedback:', feedback);
           setFinalFeedback(feedback);
-          // Modal is already shown when stop button is clicked
-          // setShowFeedbackModal(true); // Removed this line
         }
       });
       if (speechRecognitionRef.current) {
