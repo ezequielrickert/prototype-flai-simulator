@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Trophy, Target, MessageCircle, Volume2, CheckCircle2, Lock, Mic } from "lucide-react"
-import { DailyQuiz } from "@/components/daily-quiz"
 import { ProgressChart } from "@/components/progress-chart"
 import { RealtimeChatInterface } from "@/components/realtime-chat-interface"
 
@@ -30,7 +29,6 @@ export default function HomePage() {
     lastCompletedDate: "2024-01-14",
   })
 
-  const [showQuiz, setShowQuiz] = useState(false)
   const [showRealtimeChat, setShowRealtimeChat] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
 
@@ -39,32 +37,12 @@ export default function HomePage() {
     return () => clearInterval(timer)
   }, [])
 
-  const handleStartQuiz = () => {
-    setShowQuiz(true)
-  }
-
   const handleStartRealtimeChat = () => {
     setShowRealtimeChat(true)
   }
 
-  const handleQuizComplete = (score: number) => {
-    setUserProgress((prev) => ({
-      ...prev,
-      completedToday: true,
-      currentStreak: prev.currentStreak + 1,
-      totalDays: prev.totalDays + 1,
-      xp: prev.xp + score * 10,
-      lastCompletedDate: new Date().toISOString().split("T")[0],
-    }))
-    setShowQuiz(false)
-  }
-
   const xpToNextLevel = userProgress.level * 500 - (userProgress.xp % 500)
   const progressToNextLevel = ((userProgress.xp % 500) / 500) * 100
-
-  if (showQuiz) {
-    return <DailyQuiz onComplete={handleQuizComplete} level={userProgress.level} />
-  }
 
   if (showRealtimeChat) {
     return (
@@ -172,80 +150,6 @@ export default function HomePage() {
                   >
                     <Mic className="w-5 h-5 mr-2" />
                     Iniciar Chat de Voz
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Daily Challenge Card */}
-            <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl">Desafío Diario</CardTitle>
-                      <CardDescription>Conversación con IA - 5 minutos</CardDescription>
-                    </div>
-                  </div>
-                  {userProgress.completedToday ? (
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      <CheckCircle2 className="w-4 h-4 mr-1" />
-                      Completado
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-blue-300 text-blue-700">
-                      Pendiente
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {currentTime.toLocaleDateString("es-ES", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                      Tema de Hoy: Conflictos de Interés
-                    </h4>
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
-                      Practica identificar y manejar situaciones donde tus intereses personales podrían entrar en
-                      conflicto con tus responsabilidades profesionales.
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={handleStartQuiz}
-                    disabled={userProgress.completedToday}
-                    className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105"
-                    style={{
-                      backgroundColor: userProgress.completedToday ? "#6b7280" : "#1d4ed8",
-                      color: "#ffffff",
-                    }}
-                  >
-                    {userProgress.completedToday ? (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                        Completado por Hoy
-                      </>
-                    ) : (
-                      <>
-                        <Volume2 className="w-5 h-5 mr-2" />
-                        Iniciar Conversación
-                      </>
-                    )}
                   </Button>
                 </div>
               </CardContent>
