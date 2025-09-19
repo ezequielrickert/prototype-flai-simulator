@@ -50,15 +50,15 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
             </CardTitle>
             <div className="separator" />
           </CardHeader>
-          <CardContent className="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+          <CardContent className="p-8 overflow-y-auto max-h-[calc(90vh-140px)] text-[var(--cream)]">
             <div className="space-y-10">
               {!feedback ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
                     <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-black mb-2">Generando tu reflexión final...</h3>
-                  <p className="text-black text-center max-w-md mb-4" style={{lineHeight: '1.6'}}>
+                  <h3 className="text-xl font-bold text-[var(--cream)] mb-2">Generando tu reflexión final...</h3>
+                  <p className="text-[var(--cream)] text-center max-w-md mb-4" style={{lineHeight: '1.6'}}>
                     Marcus está preparando una reflexión personalizada basada en nuestra conversación. Esto puede tomar unos momentos.
                   </p>
                   <div className="mt-6 w-full max-w-xs">
@@ -83,10 +83,10 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                             <Lightbulb className="icon-gold w-5 h-5" />
                           )}
                         </span>
-                        <h3 className="text-xl font-bold" style={{color: '#D4AF37'}}>{section.text}</h3>
+                        <h3 className="text-xl font-bold text-[var(--cream)]" style={{color: '#D4AF37'}}>{section.text}</h3>
                       </div>
                     ) : (
-                      <div className="text-black leading-relaxed" style={{lineHeight: '1.6'}}>
+                      <div className="text-[var(--cream)] leading-relaxed" style={{lineHeight: '1.6'}}>
                         {section.text.split('\n').map((line, lineIndex) => {
                           if (line.trim().startsWith('-')) {
                             return (
@@ -112,21 +112,21 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                 ))
               ) : (
                 <div className="space-y-4">
-                  <div className="bg-white p-6 rounded-lg border border-[#D4AF37] shadow-sm">
+                  <div className="bg-[var(--gray-dark)] p-6 rounded-lg border border-[#D4AF37] shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="icon-gold">
                         <Target className="w-6 h-6" />
                       </span>
-                      <h3 className="font-bold text-xl" style={{color: '#D4AF37'}}>Reflexión de Marcus</h3>
+                      <h3 className="font-bold text-xl text-[var(--cream)]" style={{color: '#D4AF37'}}>Reflexión de Marcus</h3>
                     </div>
-                    <p className="text-black leading-relaxed" style={{lineHeight: '1.6'}}>{feedback}</p>
+                    <p className="text-[var(--cream)] leading-relaxed" style={{lineHeight: '1.6'}}>{feedback}</p>
                   </div>
                 </div>
               )}
             </div>
             <div className="mt-12 pt-8 border-t border-[#D4AF37]">
               <div className="flex items-center justify-between">
-                <div className="text-base text-black font-medium">
+                <div className="text-base text-[var(--cream)] font-medium">
                   <span className="font-bold">Marcus</span> • Coach de Ética Empresarial
                 </div>
                 <Button
