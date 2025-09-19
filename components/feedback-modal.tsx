@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, RefreshCw, BookOpen, Lightbulb } from 'lucide-react';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
 
   return (
     <>
-      <Card className="max-w-3xl max-h-[90vh] w-full overflow-hidden shadow-xl" style={{background: '#F8F8F8', color: '#000'}}>
+      <Card className="max-w-3xl max-h-[90vh] w-full overflow-hidden shadow-xl">
         <CardHeader className="bg-white border-b border-[#D4AF37] px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -51,9 +52,6 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                 <CardTitle className="text-2xl font-bold text-black tracking-wide">Reflexión Final de Marcus</CardTitle>
                 <p className="text-base text-black mt-1 flex items-center gap-2 font-medium">
                   Tu coach de ética empresarial
-                  <span className="text-xs bg-[#F8F8F8] text-[#D4AF37] px-2 py-1 rounded-full flex items-center gap-1 border border-[#D4AF37] font-semibold">
-                    🔇 Micrófono desactivado
-                  </span>
                 </p>
               </div>
             </div>
@@ -90,9 +88,15 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                   {section.type === 'title' ? (
                     <div className="flex items-center gap-3 mb-2">
                       <span className="w-7 h-7 bg-[#D4AF37] rounded-full flex items-center justify-center text-white text-lg">
-                        {section.text.includes('bien') ? '✅' :
-                         section.text.includes('mejorar') ? '🔄' : 
-                         section.text.includes('aprendizaje') ? '📚' : '💡'}
+                        {section.text.includes('bien') ? (
+                          <CheckCircle className="icon-gold w-5 h-5" />
+                        ) : section.text.includes('mejorar') ? (
+                          <RefreshCw className="icon-gold w-5 h-5" />
+                        ) : section.text.includes('aprendizaje') ? (
+                          <BookOpen className="icon-gold w-5 h-5" />
+                        ) : (
+                          <Lightbulb className="icon-gold w-5 h-5" />
+                        )}
                       </span>
                       <h3 className="text-xl font-bold" style={{color: '#D4AF37'}}>{section.text}</h3>
                     </div>
