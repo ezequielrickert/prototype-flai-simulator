@@ -32,7 +32,6 @@ export function RealtimeChatInterface() {
     isMicrophoneMuted,
     microphoneAudioLevel,
     sendTextMessage,
-    setError,
     closeFeedbackModal
   } = useRealtimeChat();
 

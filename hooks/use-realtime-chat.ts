@@ -304,8 +304,7 @@ export const useRealtimeChat = () => {
     microphoneAudioLevel: microphoneControl.audioLevel,
     toggleMicrophone: microphoneControl,
     muteMicrophone: microphoneControl,
-    unmuteMicrophone: microphoneControl
-    setError,
+    unmuteMicrophone: microphoneControl,
     closeFeedbackModal
   };
 };
