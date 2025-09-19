@@ -17,6 +17,7 @@ export const useRealtimeChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [speechRecognitionPaused, setSpeechRecognitionPaused] = useState(false);
   const [finalFeedback, setFinalFeedback] = useState<string | null>(null);
+  const [partialFeedback, setPartialFeedback] = useState<string>('');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const serviceRef = useRef<OpenAIRealtimeService | null>(null);
@@ -128,7 +129,17 @@ export const useRealtimeChat = () => {
         onFinalFeedback: (feedback: string) => {
           console.log('Received final feedback:', feedback);
           setFinalFeedback(feedback);
-        }
+        },
+        onFinalFeedbackDelta: (delta: string, isPartial: boolean) => {
+          if (isPartial) {
+              // Acumular deltas parciales
+              setPartialFeedback(prev => prev + delta);
+          } else {
+              // Feedback completo
+              setPartialFeedback(delta);
+              setFinalFeedback(delta);
+          }
+        },
       });
       if (speechRecognitionRef.current) {
         speechRecognitionRef.current.setEventHandlers({
@@ -297,6 +308,7 @@ export const useRealtimeChat = () => {
     speechRecognitionPaused,
     finalFeedback,
     showFeedbackModal,
+    partialFeedback,
     startConversation,
     stopConversation,
     sendTextMessage,

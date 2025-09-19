@@ -24,6 +24,7 @@ export function RealtimeChatInterface() {
     isListening,
     speechRecognitionPaused,
     finalFeedback,
+    partialFeedback,
     showFeedbackModal,
     startConversation,
     stopConversation,
@@ -76,7 +77,7 @@ export function RealtimeChatInterface() {
   const handleStartConversation = async () => {
     await startConversation();
   };
-  
+
 
   const getStatusClassName = (type: string) => {
     switch (type) {
@@ -365,6 +366,7 @@ export function RealtimeChatInterface() {
           <FeedbackModal
               isOpen={showFeedbackModal}
               feedback={finalFeedback}
+              partialFeedback={partialFeedback}
               onClose={closeFeedbackModal}
           />
       </div>
