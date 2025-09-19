@@ -225,7 +225,7 @@ export default function PerfilPage() {
                 const inicial = ev.nombre ? ev.nombre[0].toUpperCase() : "S"
                 return (
                   <div key={idx} className="flex items-center gap-4 p-4 rounded-lg bg-beige/40 border border-gold card-custom shadow-md" style={{border: '2px solid #D4AF37'}}>
-                    <span className="rounded-full bg-gold text-black font-bold w-10 h-10 flex items-center justify-center" style={{fontSize: '1.3em'}}>{inicial}</span>
+                    <span className="rounded-full bg-brown-dark-20 text-cream font-bold w-10 h-10 flex items-center justify-center" style={{fontSize: '1.3em'}}>{inicial}</span>
                     <div className="flex flex-col flex-1 gap-2">
                       <span className="text-sm muted mb-1" style={{fontWeight: 600}}>{ev.nombre} · {mesAnio.charAt(0).toUpperCase() + mesAnio.slice(1)}</span>
                       <span className="muted text-base">{ev.comentario}</span>
