@@ -313,8 +313,8 @@ Al final de la sesión, cuando se solicite, proporcionarás un feedback integral
         console.log('Connection state:', this.pc!.connectionState);
         if (this.pc!.connectionState === 'connected') {
           this.isConnected = true;
-          this.updateStatus('Connected - You can speak now!', 'connected');
-          this.addMessage('🎤 Ready to chat! Start speaking...', 'system');
+          this.updateStatus('Conectado - ¡Hablale!', 'connected');
+          this.addMessage('🎤 ¡Listo para chatear! Comienza a hablar...', 'system');
 
           // Send initial coaching session start message
           if (this.dc && this.dc.readyState === 'open') {
@@ -431,12 +431,12 @@ Mantén un tono constructivo, alentador pero honesto. Usa ejemplos específicos 
       }
 
       this.isConnected = false;
-      this.updateStatus('Disconnected', 'normal');
-      this.addMessage('Conversation ended', 'system');
+      this.updateStatus('Desconectado', 'normal');
+      this.addMessage('Conversación finalizada', 'system');
 
     } catch (error) {
-      console.error('Error stopping conversation:', error);
-      this.handleConnectionError('Error disconnecting');
+      console.error('Error al detener la conversación:', error);
+      this.handleConnectionError('Error al desconectar');
     }
   }
 

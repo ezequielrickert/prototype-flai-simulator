@@ -51,7 +51,7 @@ export function ChatWindow({ conversation }: ChatWindowProps) {
             <div className="h-full flex items-center justify-center">
               <div className="text-center text-gray-400">
                 <div className="text-3xl mb-2">�</div>
-                <p className="text-sm">Esperando que Marcus comience a hablar...</p>
+                <p className="text-sm">Esperando que Mariana comience a hablar...</p>
               </div>
             </div>
           )}

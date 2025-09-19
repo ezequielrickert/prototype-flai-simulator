@@ -34,7 +34,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div className="flex items-start gap-2">
           <div className="flex-1">
             <div className={`text-sm ${isUser ? 'text-blue-100' : 'text-gray-500'} mb-1`}>
-              {isUser ? 'Tú' : 'Marcus'}
+              {isUser ? 'Tú' : 'Mariana'}
               {isPartial && <span className="ml-1 text-xs">(escribiendo...)</span>}
             </div>
             <div className={`text-sm leading-relaxed ${isPartial ? 'animate-pulse' : ''}`}>

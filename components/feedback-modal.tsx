@@ -49,7 +49,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
               </div>
               <div>
                 <CardTitle className="text-xl font-semibold text-gray-900">
-                  Reflexión Final de Marcus
+                  Reflexión Final de Mariana
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
                   Tu coach de ética empresarial
@@ -82,7 +82,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                   Generando tu reflexión final...
                 </h3>
                 <p className="text-gray-600 text-center max-w-md">
-                  Marcus está preparando una reflexión personalizada basada en nuestra conversación. 
+                  Mariana está preparando una reflexión personalizada basada en nuestra conversación. 
                   Esto puede tomar unos momentos.
                 </p>
                 <div className="mt-6 w-full max-w-xs">
@@ -129,7 +129,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <span className="text-blue-600">🎯</span>
-                    Reflexión de Marcus
+                    Reflexión de Mariana
                   </h3>
                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {feedback}
@@ -142,7 +142,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
-                <span className="font-medium">Marcus</span> • Coach de Ética Empresarial
+                <span className="font-medium">Mariana</span> • Coach de Ética Empresarial
               </div>
               <Button
                 onClick={onClose}

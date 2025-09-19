@@ -200,7 +200,7 @@ export function RealtimeChatInterface() {
                     {isAISpeaking && (
                       <div className="flex items-center gap-1 px-2 py-1 bg-gold/20 border border-gold rounded-full animate-pulse">
                         <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
-                        <span className="text-xs text-gold font-medium">Marcus</span>
+                        <span className="text-xs text-gold font-medium">Mariana</span>
                       </div>
                     )}
                   </div>
@@ -347,7 +347,7 @@ export function RealtimeChatInterface() {
                 <div className="text-2xl">🎤</div>
                 <h3 className="font-semibold text-gold">¿Listo para comenzar?</h3>
                 <p className="text-sm text-gray-300 max-w-md mx-auto">
-                    Haz clic en "Iniciar Chat con Marcus" para comenzar a recibir mensajes de voz de Marcus,
+                    Haz clic en "Iniciar Chat con Mariana" para comenzar a recibir mensajes de voz de Mariana,
                     tu coach de ética empresarial. Solo necesitas tus altavoces o audífonos funcionando.
                 </p>
                 <div className="flex justify-center gap-6 text-xs text-gray-500 mt-4">
@@ -361,7 +361,7 @@ export function RealtimeChatInterface() {
                     </div>
                     <div className="flex items-center gap-1">
                         <span>🤖</span>
-                        <span>Solo mensajes de Marcus</span>
+                        <span>Solo mensajes de Mariana</span>
                     </div>
                 </div>
               </div>
