@@ -16,6 +16,8 @@ export const useRealtimeChat = () => {
   const [currentTranscript, setCurrentTranscript] = useState<string>('');
   const [isListening, setIsListening] = useState(false);
   const [speechRecognitionPaused, setSpeechRecognitionPaused] = useState(false);
+  const [finalFeedback, setFinalFeedback] = useState<string | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const serviceRef = useRef<OpenAIRealtimeService | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -121,13 +123,12 @@ export const useRealtimeChat = () => {
           }
         },
         onAISpeakingStateChange: (isSpeaking: boolean) => {
-          if (isSpeaking) {
-            pauseSpeechRecognition();
-          } else {
-            setTimeout(() => {
-              resumeSpeechRecognition();
-            }, 1000);
-          }
+          console.log('AI speaking state change:', isSpeaking);
+        },
+        onFinalFeedback: (feedback: string) => {
+          console.log('Received final feedback:', feedback);
+          setFinalFeedback(feedback);
+          setShowFeedbackModal(true);
         }
       });
       if (speechRecognitionRef.current) {
@@ -263,6 +264,12 @@ export const useRealtimeChat = () => {
     return audioRef.current;
   }, []);
 
+  const closeFeedbackModal = useCallback(() => {
+    setShowFeedbackModal(false);
+    setFinalFeedback(null);
+  }, []);
+
+  // Initialize audio element on mount
   useEffect(() => {
     createAudioElement();
     return () => {
@@ -285,6 +292,8 @@ export const useRealtimeChat = () => {
     currentTranscript,
     isListening,
     speechRecognitionPaused,
+    finalFeedback,
+    showFeedbackModal,
     startConversation,
     stopConversation,
     sendTextMessage,
@@ -296,5 +305,7 @@ export const useRealtimeChat = () => {
     toggleMicrophone: microphoneControl,
     muteMicrophone: microphoneControl,
     unmuteMicrophone: microphoneControl
+    setError,
+    closeFeedbackModal
   };
 };

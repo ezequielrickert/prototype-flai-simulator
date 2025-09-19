@@ -29,12 +29,15 @@ export class OpenAIRealtimeService {
   private onMicrophoneStream?: (stream: MediaStream | null) => void;
   private onAISpeakingStateChange?: (isSpeaking: boolean) => void;
   private onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
+  private onFinalFeedback?: (feedback: string) => void;
 
   // Para manejar deltas de conversación
   private currentAssistantMessage: string = '';
   private currentUserMessage: string = '';
   private assistantMessageId: string | null = null;
   private aiSpeakingTimeout: NodeJS.Timeout | null = null;
+  private isCollectingFinalFeedback: boolean = false;
+  private finalFeedbackBuffer: string = '';
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -47,6 +50,7 @@ export class OpenAIRealtimeService {
     onMicrophoneStream?: (stream: MediaStream | null) => void;
     onAISpeakingStateChange?: (isSpeaking: boolean) => void;
     onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
+    onFinalFeedback?: (feedback: string) => void;
   }) {
     this.onStatusChange = handlers.onStatusChange;
     this.onMessage = handlers.onMessage;
@@ -54,6 +58,7 @@ export class OpenAIRealtimeService {
     this.onMicrophoneStream = handlers.onMicrophoneStream;
     this.onAISpeakingStateChange = handlers.onAISpeakingStateChange;
     this.onTranscriptReceived = handlers.onTranscriptReceived;
+    this.onFinalFeedback = handlers.onFinalFeedback;
   }
 
   private updateStatus(message: string, type: string = 'normal') {
@@ -67,60 +72,93 @@ export class OpenAIRealtimeService {
       case 'response.audio_transcript.delta':
         // Delta de transcripción de audio del asistente
         if (data.delta) {
-          this.currentAssistantMessage += data.delta;
-          this.updateAssistantMessage(this.currentAssistantMessage, true);
-          
-          // Notificar que la IA está hablando
-          this.onAISpeakingStateChange?.(true);
-          
-          // Resetear el timeout para cuando termine de hablar
-          if (this.aiSpeakingTimeout) {
-            clearTimeout(this.aiSpeakingTimeout);
+          if (this.isCollectingFinalFeedback) {
+            // Si estamos recolectando feedback final, acumularlo separadamente
+            // No activar eventos de speaking state durante feedback
+            this.finalFeedbackBuffer += data.delta;
+            console.log('Collecting final feedback delta:', data.delta);
+          } else {
+            // Comportamiento normal para mensajes durante la conversación
+            this.currentAssistantMessage += data.delta;
+            this.updateAssistantMessage(this.currentAssistantMessage, true);
+
+            // Notificar que la IA está hablando (solo durante conversación normal)
+            this.onAISpeakingStateChange?.(true);
+
+            // Resetear el timeout para cuando termine de hablar
+            if (this.aiSpeakingTimeout) {
+              clearTimeout(this.aiSpeakingTimeout);
+            }
+            this.aiSpeakingTimeout = setTimeout(() => {
+              this.onAISpeakingStateChange?.(false);
+            }, 2000); // 2 segundos sin deltas = IA terminó de hablar
           }
-          this.aiSpeakingTimeout = setTimeout(() => {
-            this.onAISpeakingStateChange?.(false);
-          }, 2000); // 2 segundos sin deltas = IA terminó de hablar
         }
         break;
         
       case 'response.audio_transcript.done':
-        // Transcripción del asistente completada
-        if (this.currentAssistantMessage) {
-          this.updateAssistantMessage(this.currentAssistantMessage, false);
-          this.currentAssistantMessage = '';
-          this.assistantMessageId = null;
+        if (this.isCollectingFinalFeedback) {
+          // Si estamos recolectando feedback final, enviarlo al callback especial
+          if (this.finalFeedbackBuffer.trim()) {
+            console.log('Final feedback complete:', this.finalFeedbackBuffer.trim());
+            this.onFinalFeedback?.(this.finalFeedbackBuffer.trim());
+            this.finalFeedbackBuffer = '';
+          }
+          this.isCollectingFinalFeedback = false;
+        } else {
+          // Transcripción del asistente completada (comportamiento normal)
+          if (this.currentAssistantMessage) {
+            this.updateAssistantMessage(this.currentAssistantMessage, false);
+            this.currentAssistantMessage = '';
+            this.assistantMessageId = null;
+          }
+
+          // IA terminó de hablar definitivamente
+          if (this.aiSpeakingTimeout) {
+            clearTimeout(this.aiSpeakingTimeout);
+          }
+          setTimeout(() => {
+            console.log('AI terminó de hablar - enviando señal para reanudar speech recognition');
+            this.onAISpeakingStateChange?.(false);
+          }, 1000); // Esperar 1 segundo antes de reanudar
         }
-        
-        // IA terminó de hablar definitivamente
-        if (this.aiSpeakingTimeout) {
-          clearTimeout(this.aiSpeakingTimeout);
-        }
-        setTimeout(() => {
-          console.log('AI terminó de hablar - enviando señal para reanudar speech recognition');
-          this.onAISpeakingStateChange?.(false);
-        }, 1000); // Esperar 1 segundo antes de reanudar
         break;
         
       case 'response.text.delta':
         // Delta de respuesta de texto del asistente
         if (data.delta) {
-          this.currentAssistantMessage += data.delta;
-          this.updateAssistantMessage(this.currentAssistantMessage, true);
+          if (this.isCollectingFinalFeedback) {
+            this.finalFeedbackBuffer += data.delta;
+            console.log('Collecting final feedback text delta:', data.delta);
+          } else {
+            this.currentAssistantMessage += data.delta;
+            this.updateAssistantMessage(this.currentAssistantMessage, true);
+          }
         }
         break;
         
       case 'response.text.done':
-        // Respuesta de texto del asistente completada
-        if (this.currentAssistantMessage) {
-          this.updateAssistantMessage(this.currentAssistantMessage, false);
-          this.currentAssistantMessage = '';
-          this.assistantMessageId = null;
+        if (this.isCollectingFinalFeedback) {
+          // Si estamos recolectando feedback final, enviarlo al callback especial
+          if (this.finalFeedbackBuffer.trim()) {
+            console.log('Final feedback text complete:', this.finalFeedbackBuffer.trim());
+            this.onFinalFeedback?.(this.finalFeedbackBuffer.trim());
+            this.finalFeedbackBuffer = '';
+          }
+          this.isCollectingFinalFeedback = false;
+        } else {
+          // Respuesta de texto del asistente completada (comportamiento normal)
+          if (this.currentAssistantMessage) {
+            this.updateAssistantMessage(this.currentAssistantMessage, false);
+            this.currentAssistantMessage = '';
+            this.assistantMessageId = null;
+          }
         }
         break;
         
       case 'conversation.item.created':
         // Nuevo item de conversación creado
-        if (data.item?.content) {
+        if (!this.isCollectingFinalFeedback && data.item?.content) {
           const content = Array.isArray(data.item.content) ? data.item.content[0] : data.item.content;
           if (content?.transcript || content?.text) {
             const text = content.transcript || content.text;
@@ -135,15 +173,20 @@ export class OpenAIRealtimeService {
         break;
         
       case 'response.done':
-        // La respuesta completa de la IA ha terminado
-        console.log('Respuesta de IA completamente terminada');
-        if (this.aiSpeakingTimeout) {
-          clearTimeout(this.aiSpeakingTimeout);
+        if (this.isCollectingFinalFeedback) {
+          // Si estamos recolectando feedback final, no procesar events de response.done
+          console.log('Response done during feedback collection - ignoring');
+        } else {
+          // La respuesta completa de la IA ha terminado (comportamiento normal)
+          console.log('Respuesta de IA completamente terminada');
+          if (this.aiSpeakingTimeout) {
+            clearTimeout(this.aiSpeakingTimeout);
+          }
+          setTimeout(() => {
+            console.log('Response done - enviando señal para reanudar speech recognition');
+            this.onAISpeakingStateChange?.(false);
+          }, 800);
         }
-        setTimeout(() => {
-          console.log('Response done - enviando señal para reanudar speech recognition');
-          this.onAISpeakingStateChange?.(false);
-        }, 800);
         break;
         
       default:
@@ -238,11 +281,19 @@ export class OpenAIRealtimeService {
           const systemMessage = {
             type: 'session.update',
             session: {
-              instructions: MARCUS_PERSONALITY
+              instructions: `${MARCUS_PERSONALITY}
+
+IMPORTANTE: Durante esta sesión, mantén un registro mental detallado de:
+- Las decisiones éticas discutidas y el razonamiento del usuario
+- Fortalezas y debilidades en el pensamiento ético mostrado
+- Momentos clave de aprendizaje o comprensión
+- Patrones en el enfoque del usuario hacia dilemas éticos
+
+Al final de la sesión, cuando se solicite, proporcionarás un feedback integral estructurado que refleje sobre toda la conversación, identificando qué estuvo bien, qué se puede mejorar, y el valor del aprendizaje obtenido.`
             }
           };
           this.dc.send(JSON.stringify(systemMessage));
-          console.log('Sent Marcus personality instructions');
+          console.log('Sent Marcus personality instructions with memory guidance');
         }
       };
 
@@ -264,6 +315,18 @@ export class OpenAIRealtimeService {
           this.isConnected = true;
           this.updateStatus('Connected - You can speak now!', 'connected');
           this.addMessage('🎤 Ready to chat! Start speaking...', 'system');
+
+          // Send initial coaching session start message
+          if (this.dc && this.dc.readyState === 'open') {
+            const sessionStartMessage = {
+              "type": "response.create",
+              "response": {
+                "instructions": "Saluda al usuario como Marcus e inicia la sesión de coaching ético. Explica brevemente que al final de la sesión proporcionarás una reflexión integral sobre las decisiones éticas discutidas. Pregúntale qué situación o dilema ético le gustaría explorar hoy."
+              }
+            };
+            this.dc.send(JSON.stringify(sessionStartMessage));
+            console.log('Sent session start message');
+          }
         } else if (this.pc!.connectionState === 'failed' || this.pc!.connectionState === 'disconnected') {
           this.handleConnectionError('Connection failed');
         }
@@ -306,22 +369,56 @@ export class OpenAIRealtimeService {
 
   async stopConversation(): Promise<void> {
     try {
-      this.updateStatus('Disconnecting...', 'connecting');
+      this.updateStatus('Stopping microphone and generating final reflection...', 'thinking');
 
-      // Send final feedback request before closing the connection
+      // First, stop all media tracks and disable microphone immediately
+      if (this.currentStream) {
+        this.currentStream.getTracks().forEach(track => track.stop());
+        this.currentStream = null;
+        // Notify about stream removal
+        this.onMicrophoneStream?.(null);
+        console.log('Microphone stopped for feedback generation');
+      }
+
+      // Enable final feedback collection mode
+      this.isCollectingFinalFeedback = true;
+      this.finalFeedbackBuffer = '';
+
+      // Send comprehensive final feedback request using conversation memory
       if (this.dc && this.dc.readyState === 'open') {
         const finalFeedbackRequest = {
           "type": "response.create",
           "response": {
-            "instructions": "Por favor genera un resumen final de la retroalimentación sobre las decisiones éticas del usuario en esta sesión. Mantén el tono profesional y conciso, resaltando fortalezas y posibles áreas de mejora."
+            "instructions": `Como Marcus, tu coach de ética empresarial, proporciona una reflexión final integral de esta sesión de coaching basada en toda nuestra conversación. 
+
+Estructura tu respuesta en estas tres secciones:
+
+**¿Qué estuvo bien?**
+- Identifica decisiones éticas sólidas y fortalezas demostradas
+- Reconoce momentos de buena reflexión crítica
+- Destaca habilidades de liderazgo ético mostradas
+
+**¿Qué se puede mejorar?**
+- Señala áreas donde las decisiones podrían haberse beneficiado de mayor consideración ética
+- Identifica patrones de pensamiento que podrían necesitar desarrollo
+- Sugiere marcos éticos específicos que podrían haber sido útiles
+
+**Valor del aprendizaje**
+- Resume las lecciones clave obtenidas durante la sesión
+- Conecta estos aprendizajes con situaciones futuras de liderazgo
+- Proporciona 2-3 acciones concretas para continuar el desarrollo ético
+
+Mantén un tono constructivo, alentador pero honesto. Usa ejemplos específicos de nuestra conversación. Limita tu respuesta a 300-400 palabras para que sea concisa pero significativa.`
           }
         };
         this.dc.send(JSON.stringify(finalFeedbackRequest));
-        console.log('Sent final feedback request');
+        console.log('Sent comprehensive final feedback request');
         
-        // Wait a moment for the response before closing
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait longer for the more detailed response
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Aumentado a 5 segundos
       }
+
+      this.updateStatus('Disconnecting...', 'connecting');
 
       if (this.dc) {
         this.dc.close();
@@ -331,14 +428,6 @@ export class OpenAIRealtimeService {
       if (this.pc) {
         this.pc.close();
         this.pc = null;
-      }
-
-      // Stop all media tracks
-      if (this.currentStream) {
-        this.currentStream.getTracks().forEach(track => track.stop());
-        this.currentStream = null;
-        // Notify about stream removal
-        this.onMicrophoneStream?.(null);
       }
 
       this.isConnected = false;
