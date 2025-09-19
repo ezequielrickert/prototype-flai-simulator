@@ -96,7 +96,7 @@ export default function HomePage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: 'var(--brown-dark)'}}>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: 'var(--brown-dark-20)'}}>
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -145,7 +145,7 @@ export default function HomePage() {
                   <Button
                     onClick={handleStartQuiz}
                     disabled={userProgress.completedToday}
-                    className={`button-beige w-full font-semibold py-3 rounded-lg transition-all duration-200 ${userProgress.completedToday ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`button-beige h-12 w-full font-bold py-3 rounded-lg transition-all duration-200 ${userProgress.completedToday ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {userProgress.completedToday ? (
                       <>
