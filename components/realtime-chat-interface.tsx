@@ -237,8 +237,7 @@ export function RealtimeChatInterface() {
               <Button
                 onClick={handleStopConversation}
                 disabled={isLoading || !isConnected}
-                variant="outline"
-                className="flex-1 border-gold text-gold hover:bg-gold/10 h-12 font-bold py-3 rounded-lg"
+                className={`button-finalizar flex-1 h-12 font-bold py-3 rounded-lg transition-all duration-200 ${isLoading || !isConnected ? 'opacity-60 cursor-not-allowed' : ''}`}
                 size="lg"
               >
                 <div className="flex items-center gap-2">

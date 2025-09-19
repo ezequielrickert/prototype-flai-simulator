@@ -173,6 +173,42 @@
     box-shadow: 0 2px 8px 0 rgba(106,85,24,0.18);
     opacity: 0.95;
   }
+  .button-beige:disabled, .button-finalizar:disabled {
+    background: transparent !important;
+    border: 2px solid var(--gold) !important;
+    color: #aaa !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+  }
+  .button-finalizar {
+    position: relative;
+    background: var(--gold);
+    color: var(--cream);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(106,85,24,0.18);
+    overflow: hidden;
+    transition: background 0.18s cubic-bezier(.4,2,.3,1), color 0.18s, box-shadow 0.18s, transform 0.18s;
+  }
+  .button-finalizar * {
+    position: relative;
+    z-index: 1;
+  }
+  .button-finalizar:hover, .button-finalizar:focus {
+    background: var(--beige);
+    color: var(--brown-dark);
+    box-shadow: 0 6px 24px 0 rgba(212,175,55,0.28);
+    transform: scale(1.04) translateY(-2px);
+  }
+  .button-finalizar:active {
+    background: var(--gold-dark);
+    color: var(--cream);
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px 0 rgba(106,85,24,0.18);
+    opacity: 0.95;
+  }
   .proximo-tema-item {
     background: var(--beige);
     color: var(--brown-dark);
