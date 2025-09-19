@@ -408,7 +408,7 @@ Mantén un tono constructivo, alentador pero honesto. Usa ejemplos específicos 
         console.log('Sent comprehensive final feedback request');
         
         // Wait longer for the more detailed response
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Aumentado a 5 segundos
+        await new Promise(resolve => setTimeout(resolve, 10000000)); // Aumentado a 5 segundos
       }
 
       this.updateStatus('Disconnecting...', 'connecting');

@@ -83,7 +83,8 @@ export const useRealtimeChat = () => {
         onFinalFeedback: (feedback: string) => {
           console.log('Received final feedback:', feedback);
           setFinalFeedback(feedback);
-          setShowFeedbackModal(true);
+          // Modal is already shown when stop button is clicked
+          // setShowFeedbackModal(true); // Removed this line
         }
       });
       
@@ -134,6 +135,9 @@ export const useRealtimeChat = () => {
     }
 
     setIsLoading(true);
+    
+    // Show the feedback modal immediately when stop is clicked
+    setShowFeedbackModal(true);
 
     try {
       await serviceRef.current.stopConversation();
