@@ -8,6 +8,9 @@ export const useRealtimeChat = () => {
   const [status, setStatus] = useState<string>('Disconnected');
   const [statusType, setStatusType] = useState<string>('normal');
   const [isConnected, setIsConnected] = useState(false);
+  const [isAIThinking, setIsAIThinking] = useState(false);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   
   const serviceRef = useRef<OpenAIRealtimeService | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -25,6 +28,17 @@ export const useRealtimeChat = () => {
           setIsConnected(serviceRef.current?.getIsConnected() || false);
         },
         onMessage: (message: RealtimeMessage) => {
+          // Track AI state based on messages
+          if (message.speaker === 'assistant') {
+            setIsAIThinking(false);
+            setIsAISpeaking(true);
+            // Reset speaking state after a delay (assuming message duration)
+            setTimeout(() => setIsAISpeaking(false), 3000);
+          } else if (message.speaker === 'user') {
+            setIsUserSpeaking(true);
+            setTimeout(() => setIsUserSpeaking(false), 2000);
+          }
+
           setConversation(prev => {
             if (!prev) {
               return {
@@ -153,6 +167,9 @@ export const useRealtimeChat = () => {
     status,
     statusType,
     isConnected,
+    isAIThinking,
+    isAISpeaking,
+    isUserSpeaking,
     startConversation,
     stopConversation,
     sendTextMessage,

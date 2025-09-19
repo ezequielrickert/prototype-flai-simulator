@@ -13,6 +13,9 @@ export function RealtimeChatInterface() {
     status,
     statusType,
     isConnected,
+    isAIThinking,
+    isAISpeaking,
+    isUserSpeaking,
     startConversation,
     stopConversation,
     sendTextMessage,
@@ -30,121 +33,149 @@ export function RealtimeChatInterface() {
   const getStatusClassName = (type: string) => {
     switch (type) {
       case 'error':
-        return 'text-red-600';
+        return 'text-red-600 bg-red-50 border-red-200';
       case 'connecting':
-        return 'text-yellow-600';
+        return 'text-amber-600 bg-amber-50 border-amber-200';
       case 'connected':
-        return 'text-green-600';
+        return 'text-green-600 bg-green-50 border-green-200';
       default:
-        return 'text-gray-600';
+        return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (type: string) => {
+    switch (type) {
+      case 'error':
+        return '❌';
+      case 'connecting':
+        return '🔄';
+      case 'connected':
+        return '🟢';
+      default:
+        return '⚪';
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>OpenAI Real-time Voice Chat</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Status Display */}
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className={`text-sm font-medium ${getStatusClassName(statusType)}`}>
-              Status: {status}
-            </p>
+    <div className="max-w-4xl mx-auto p-4 space-y-6">
+      {/* Header with Status */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-semibold">AI Voice Chat</CardTitle>
+            <div className="flex items-center gap-3">
+              {/* Activity Indicators */}
+              {isConnected && (
+                <div className="flex items-center gap-2">
+                  {isUserSpeaking && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      <span className="text-xs text-blue-700 font-medium">You</span>
+                    </div>
+                  )}
+                  {isAIThinking && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-full">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" />
+                      <span className="text-xs text-orange-700 font-medium">Thinking</span>
+                    </div>
+                  )}
+                  {isAISpeaking && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-purple-50 border border-purple-200 rounded-full">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                      <span className="text-xs text-purple-700 font-medium">AI</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Status Badge */}
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${getStatusClassName(statusType)}`}>
+                <span className="text-sm">{getStatusIcon(statusType)}</span>
+                <span className="text-xs font-medium">{status}</span>
+              </div>
+            </div>
           </div>
-
+        </CardHeader>
+        <CardContent className="pt-0">
           {/* Control Buttons */}
           <div className="flex gap-3">
             <Button
               onClick={handleStartConversation}
               disabled={isLoading || isConnected}
-              className="flex-1"
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              size="lg"
             >
-              {isLoading ? 'Connecting...' : 'Start Conversation'}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Connecting...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  🎙️ Start Conversation
+                </div>
+              )}
             </Button>
             <Button
               onClick={handleStopConversation}
               disabled={isLoading || !isConnected}
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+              size="lg"
             >
-              Stop Conversation
+              <div className="flex items-center gap-2">
+                🔴 Stop Conversation
+              </div>
             </Button>
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm">
-                ❌ Error: {error}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setError(null)}
-                className="mt-2 text-red-600 hover:text-red-800"
-              >
-                Dismiss
-              </Button>
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-red-500 text-lg">⚠️</span>
+                <div className="flex-1">
+                  <p className="text-red-800 font-medium text-sm">Connection Error</p>
+                  <p className="text-red-700 text-sm mt-1">{error}</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setError(null)}
+                    className="mt-2 text-red-600 hover:text-red-800 px-0"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
-
-          {/* Messages Display */}
-          {conversation && conversation.messages.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Conversation</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {conversation.messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`p-3 rounded-lg ${
-                        message.speaker === 'user'
-                          ? 'bg-blue-50 border-l-4 border-blue-400'
-                          : message.speaker === 'assistant'
-                          ? 'bg-green-50 border-l-4 border-green-400'
-                          : 'bg-gray-50 border-l-4 border-gray-400'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <p className="text-sm text-gray-700 flex-1">
-                          {message.text}
-                        </p>
-                        <span className="text-xs text-gray-500 ml-2">
-                          {message.timestamp.toLocaleTimeString()}
-                        </span>
-                      </div>
-                      <div className="mt-1">
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          message.speaker === 'user'
-                            ? 'bg-blue-100 text-blue-700'
-                            : message.speaker === 'assistant'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          {message.speaker === 'user' ? 'You' : 
-                           message.speaker === 'assistant' ? 'AI' : 'System'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Instructions */}
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>📝 <strong>Setup:</strong> Make sure you have the OpenAI API key configured</p>
-            <p>🎤 <strong>Microphone:</strong> Allow microphone access when prompted</p>
-            <p>🔊 <strong>Audio:</strong> Ensure speakers/headphones are working</p>
-            <p>💬 <strong>Usage:</strong> Click "Start Conversation" and begin speaking!</p>
-          </div>
         </CardContent>
       </Card>
+
+      {/* Instructions */}
+      {!isConnected && (
+        <Card className="border-dashed border-2 border-gray-200">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-3">
+              <div className="text-2xl">🎤</div>
+              <h3 className="font-semibold text-gray-900">Ready to start?</h3>
+              <p className="text-sm text-gray-600 max-w-md mx-auto">
+                Click "Start Conversation" to begin a real-time voice chat with AI. 
+                Make sure your microphone is enabled and speakers are working.
+              </p>
+              <div className="flex justify-center gap-6 text-xs text-gray-500 mt-4">
+                <div className="flex items-center gap-1">
+                  <span>🎙️</span>
+                  <span>Microphone access required</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>🔊</span>
+                  <span>Audio output enabled</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

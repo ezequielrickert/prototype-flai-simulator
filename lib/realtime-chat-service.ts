@@ -42,6 +42,18 @@ export class OpenAIRealtimeService {
   }
 
   private addMessage(text: string, speaker: 'user' | 'assistant' | 'system' = 'system') {
+    // Filter out technical debug messages for better UX
+    const isDebugMessage = text.includes('Data channel') || 
+                          text.includes('voice connected') || 
+                          text.includes('🔊') || 
+                          text.includes('📡') ||
+                          text.includes('🤖 AI assistant is ready');
+    
+    if (isDebugMessage) {
+      console.log(`[Debug] ${text}`);
+      return;
+    }
+
     const message: RealtimeMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       text,
@@ -78,14 +90,14 @@ export class OpenAIRealtimeService {
       this.pc.ontrack = (event) => {
         console.log('Received audio track from OpenAI');
         this.onAudioReceived?.(event.streams[0]);
-        this.addMessage('🔊 AI voice connected', 'system');
+        // Removed debug message: this.addMessage('🔊 AI voice connected', 'system');
       };
 
       // Create data channel for text messages
       this.dc = this.pc.createDataChannel('oai-events');
       this.dc.onopen = () => {
         console.log('Data channel opened');
-        this.addMessage('📡 Data channel connected', 'system');
+        // Removed debug message: this.addMessage('📡 Data channel connected', 'system');
       };
 
       this.dc.onmessage = (event) => {
@@ -99,7 +111,7 @@ export class OpenAIRealtimeService {
         if (this.pc!.connectionState === 'connected') {
           this.isConnected = true;
           this.updateStatus('Connected - You can speak now!', 'connected');
-          this.addMessage('🎤 Microphone active - start speaking!', 'system');
+          this.addMessage('🎤 Ready to chat! Start speaking...', 'system');
         } else if (this.pc!.connectionState === 'failed' || this.pc!.connectionState === 'disconnected') {
           this.handleConnectionError('Connection failed');
         }
@@ -131,7 +143,7 @@ export class OpenAIRealtimeService {
       };
 
       await this.pc.setRemoteDescription(answer);
-      this.addMessage('🤖 AI assistant is ready to chat!', 'system');
+      // Removed debug message that was cluttering the UI
 
     } catch (error) {
       console.error('Error starting conversation:', error);
@@ -161,7 +173,7 @@ export class OpenAIRealtimeService {
 
       this.isConnected = false;
       this.updateStatus('Disconnected', 'normal');
-      this.addMessage('🔌 Conversation ended', 'system');
+      this.addMessage('� Conversation ended', 'system');
 
     } catch (error) {
       console.error('Error stopping conversation:', error);
