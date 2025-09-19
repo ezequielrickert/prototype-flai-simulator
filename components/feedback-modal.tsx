@@ -11,7 +11,7 @@ interface FeedbackModalProps {
 }
 
 export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps) {
-  if (!isOpen || !feedback) {
+  if (!isOpen) {
     return null;
   }
 
@@ -36,7 +36,7 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
     return formattedSections;
   };
 
-  const formattedSections = formatFeedback(feedback);
+  const formattedSections = feedback ? formatFeedback(feedback) : [];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -72,7 +72,26 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
         
         <CardContent className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="space-y-6">
-            {formattedSections.length > 0 ? (
+            {!feedback ? (
+              // Loading state while waiting for feedback
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="animate-spin w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full"></div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Generando tu reflexión final...
+                </h3>
+                <p className="text-gray-600 text-center max-w-md">
+                  Marcus está preparando una reflexión personalizada basada en nuestra conversación. 
+                  Esto puede tomar unos momentos.
+                </p>
+                <div className="mt-6 w-full max-w-xs">
+                  <div className="bg-gray-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                  </div>
+                </div>
+              </div>
+            ) : formattedSections.length > 0 ? (
               formattedSections.map((section, index) => (
                 <div key={index}>
                   {section.type === 'title' ? (
@@ -127,9 +146,10 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
               </div>
               <Button
                 onClick={onClose}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                disabled={!feedback}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Continuar Desarrollo
+                {feedback ? 'Continuar Desarrollo' : 'Generando...'}
               </Button>
             </div>
           </div>
