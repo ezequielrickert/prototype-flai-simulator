@@ -1,4 +1,4 @@
-import { MARCUS_PERSONALITY } from './marcus-personality';
+import { MARCUS_PERSONALITY } from './john-personality';
 
 export interface RealtimeMessage {
   id: string;
