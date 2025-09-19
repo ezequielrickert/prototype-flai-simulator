@@ -305,8 +305,8 @@ export function RealtimeChatInterface() {
                 <div className="text-2xl">🎤</div>
                 <h3 className="font-semibold text-gold">¿Listo para comenzar?</h3>
                 <p className="text-sm text-gray-300 max-w-md mx-auto">
-                  Haz clic en "Iniciar Conversación" para comenzar el desafío guiado de voz con IA.<br />
-                    Asegúrate de que tu micrófono esté habilitado y los parlantes funcionen.
+                    Haz clic en "Iniciar Chat con Marcus" para comenzar a recibir mensajes de voz de Marcus,
+                    tu coach de ética empresarial. Solo necesitas tus altavoces o audífonos funcionando.
                 </p>
                 <div className="flex justify-center gap-6 text-xs text-gray-500 mt-4">
                     <div className="flex items-center gap-1">
@@ -318,8 +318,8 @@ export function RealtimeChatInterface() {
                         <span>Salida de audio habilitada</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <span>🇪🇸</span>
-                        <span>Reconocimiento de voz en español</span>
+                        <span>🤖</span>
+                        <span>Solo mensajes de Marcus</span>
                     </div>
                 </div>
               </div>
