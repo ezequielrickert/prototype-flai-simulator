@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, RefreshCw, BookOpen, Lightbulb } from 'lucide-react';
+import { CheckCircle, RefreshCw, BookOpen, Lightbulb, Target, Brain } from 'lucide-react';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -46,7 +46,9 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-md">
-                <span className="text-white text-2xl">🧠</span>
+                <span className="icon-gold">
+                  <Brain className="w-7 h-7" />
+                </span>
               </div>
               <div>
                 <CardTitle className="text-2xl font-bold text-black tracking-wide">Reflexión Final de Marcus</CardTitle>
@@ -129,7 +131,9 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
               <div className="space-y-4">
                 <div className="bg-white p-6 rounded-lg border border-[#D4AF37] shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[#D4AF37] text-xl">🎯</span>
+                    <span className="icon-gold">
+                      <Target className="w-6 h-6" />
+                    </span>
                     <h3 className="font-bold text-xl" style={{color: '#D4AF37'}}>Reflexión de Marcus</h3>
                   </div>
                   <p className="text-black leading-relaxed" style={{lineHeight: '1.6'}}>{feedback}</p>
