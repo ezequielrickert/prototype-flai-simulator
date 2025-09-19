@@ -24,14 +24,10 @@ export function RealtimeChatInterface() {
     speechRecognitionPaused,
     startConversation,
     stopConversation,
-    sendTextMessage,
     restartSpeechRecognition,
     setError,
     isMicrophoneMuted,
     microphoneAudioLevel,
-    toggleMicrophone,
-    muteMicrophone,
-    unmuteMicrophone
   } = useRealtimeChat();
 
   // Estado para tiempo transcurrido

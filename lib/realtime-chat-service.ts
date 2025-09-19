@@ -28,7 +28,8 @@ export class OpenAIRealtimeService {
   private onAudioReceived?: (stream: MediaStream) => void;
   private onMicrophoneStream?: (stream: MediaStream | null) => void;
   private onAISpeakingStateChange?: (isSpeaking: boolean) => void;
-  
+  private onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
+
   // Para manejar deltas de conversación
   private currentAssistantMessage: string = '';
   private currentUserMessage: string = '';
@@ -45,12 +46,14 @@ export class OpenAIRealtimeService {
     onAudioReceived?: (stream: MediaStream) => void;
     onMicrophoneStream?: (stream: MediaStream | null) => void;
     onAISpeakingStateChange?: (isSpeaking: boolean) => void;
+    onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
   }) {
     this.onStatusChange = handlers.onStatusChange;
     this.onMessage = handlers.onMessage;
     this.onAudioReceived = handlers.onAudioReceived;
     this.onMicrophoneStream = handlers.onMicrophoneStream;
     this.onAISpeakingStateChange = handlers.onAISpeakingStateChange;
+    this.onTranscriptReceived = handlers.onTranscriptReceived;
   }
 
   private updateStatus(message: string, type: string = 'normal') {
@@ -123,6 +126,10 @@ export class OpenAIRealtimeService {
             const text = content.transcript || content.text;
             const speaker = data.item.role === 'user' ? 'user' : 'assistant';
             this.addMessage(text, speaker, false);
+            // Si es mensaje de usuario y tiene transcript, dispara el callback
+            if (speaker === 'user' && content.transcript) {
+              this.onTranscriptReceived?.(content.transcript, !!content.isPartial);
+            }
           }
         }
         break;
@@ -377,6 +384,27 @@ export class OpenAIRealtimeService {
     }
   }
 
+  // Méto.do para enviar transcripción del usuario
+  sendUserTranscription(transcript: string, isPartial: boolean = false) {
+    if (this.dc && this.dc.readyState === 'open') {
+      // Enviar como mensaje de usuario
+      const userMessage = {
+        type: 'conversation.item.created',
+        item: {
+          role: 'user',
+          content: {
+            transcript,
+            isPartial
+          }
+        }
+      };
+      this.dc.send(JSON.stringify(userMessage));
+      this.addMessage(transcript, 'user', isPartial);
+    } else {
+      console.warn('Data channel not open, cannot send user transcription');
+    }
+  }
+
   // Get connection status
   getConnectionStatus(): string {
     if (!this.pc) return 'disconnected';
@@ -388,7 +416,6 @@ export class OpenAIRealtimeService {
     return this.isConnected;
   }
 
-  // Método para enviar transcripción del usuario
   // Cleanup method
   cleanup() {
     this.stopConversation();
@@ -408,3 +435,4 @@ export const createRealtimeService = () => {
 
 // Export a default instance
 export const realtimeService = createRealtimeService();
+
