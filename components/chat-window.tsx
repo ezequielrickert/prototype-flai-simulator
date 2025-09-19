@@ -21,7 +21,7 @@ export function ChatWindow({ conversation }: ChatWindowProps) {
 
   if (!conversation) {
     return (
-      <Card className="h-120">
+      <Card className="h-100">
         <CardContent className="h-full flex items-center justify-center p-6">
           <div className="text-center text-gray-500">
             <div className="text-4xl mb-2">💬</div>
