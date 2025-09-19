@@ -136,11 +136,11 @@ export default function HomePage() {
                 <div className="space-y-4">
                   <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                      ✨ Conversación de Voz en Tiempo Real
+                      ✨ Chat de Audio con IA
                     </h4>
                     <p className="text-sm text-green-800 dark:text-green-200">
-                      Experimenta la nueva tecnología de OpenAI Realtime API. Habla directamente con la IA usando 
-                      WebRTC para una comunicación instantánea y natural.
+                      Experimenta la nueva tecnología de OpenAI Realtime API. Escucha los mensajes de voz 
+                      de Marcus usando WebRTC para una comunicación instantánea y natural.
                     </p>
                   </div>
 
@@ -148,8 +148,8 @@ export default function HomePage() {
                     onClick={handleStartRealtimeChat}
                     className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
                   >
-                    <Mic className="w-5 h-5 mr-2" />
-                    Iniciar Chat de Voz
+                    <Volume2 className="w-5 h-5 mr-2" />
+                    Iniciar Chat con Marcus
                   </Button>
                 </div>
               </CardContent>
@@ -232,8 +232,8 @@ export default function HomePage() {
                   </Link>
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={handleStartRealtimeChat}>
-                  <Mic className="w-4 h-4 mr-2" />
-                  Chat de Voz
+                  <Volume2 className="w-4 h-4 mr-2" />
+                  Chat con Marcus
                 </Button>
                 <Button variant="outline" className="w-full justify-start" asChild>
                   <Link href="/progress">

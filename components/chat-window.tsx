@@ -7,11 +7,9 @@ import { RealtimeConversation } from '@/lib/realtime-chat-service';
 
 interface ChatWindowProps {
   conversation: RealtimeConversation | null;
-  currentTranscript?: string;
-  isListening?: boolean;
 }
 
-export function ChatWindow({ conversation, currentTranscript, isListening }: ChatWindowProps) {
+export function ChatWindow({ conversation }: ChatWindowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -19,7 +17,7 @@ export function ChatWindow({ conversation, currentTranscript, isListening }: Cha
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [conversation?.messages, currentTranscript]);
+  }, [conversation?.messages]);
 
   if (!conversation) {
     return (
@@ -46,27 +44,12 @@ export function ChatWindow({ conversation, currentTranscript, isListening }: Cha
             <ChatMessage key={message.id} message={message} />
           ))}
           
-          {/* Mostrar transcripción en progreso */}
-          {currentTranscript && (
-            <div className="flex justify-end mb-4">
-              <div className="max-w-[80%] px-4 py-2 rounded-lg bg-blue-400 text-white ml-4 opacity-60">
-                <div className="text-xs text-blue-100 mb-1">
-                  Tú (hablando...)
-                </div>
-                <div className="text-sm leading-relaxed">
-                  {currentTranscript}
-                  <span className="inline-block w-2 h-4 bg-white opacity-50 animate-pulse ml-1" />
-                </div>
-              </div>
-            </div>
-          )}
-          
           {/* Indicador de conversación vacía */}
-          {conversation.messages.length === 0 && !currentTranscript && (
+          {conversation.messages.length === 0 && (
             <div className="h-full flex items-center justify-center">
               <div className="text-center text-gray-400">
-                <div className="text-3xl mb-2">🎙️</div>
-                <p className="text-sm">Empieza a hablar para iniciar la conversación</p>
+                <div className="text-3xl mb-2">�</div>
+                <p className="text-sm">Esperando que Marcus comience a hablar...</p>
               </div>
             </div>
           )}

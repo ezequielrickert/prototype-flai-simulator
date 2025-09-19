@@ -27,7 +27,6 @@ export class OpenAIRealtimeService {
   private onMessage?: (message: RealtimeMessage) => void;
   private onAudioReceived?: (stream: MediaStream) => void;
   private onMicrophoneStream?: (stream: MediaStream | null) => void;
-  private onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
   private onAISpeakingStateChange?: (isSpeaking: boolean) => void;
   
   // Para manejar deltas de conversación
@@ -45,14 +44,12 @@ export class OpenAIRealtimeService {
     onMessage?: (message: RealtimeMessage) => void;
     onAudioReceived?: (stream: MediaStream) => void;
     onMicrophoneStream?: (stream: MediaStream | null) => void;
-    onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
     onAISpeakingStateChange?: (isSpeaking: boolean) => void;
   }) {
     this.onStatusChange = handlers.onStatusChange;
     this.onMessage = handlers.onMessage;
     this.onAudioReceived = handlers.onAudioReceived;
     this.onMicrophoneStream = handlers.onMicrophoneStream;
-    this.onTranscriptReceived = handlers.onTranscriptReceived;
     this.onAISpeakingStateChange = handlers.onAISpeakingStateChange;
   }
 
@@ -64,20 +61,6 @@ export class OpenAIRealtimeService {
     console.log('Realtime event:', data);
     
     switch (data.type) {
-      case 'conversation.item.input_audio_transcription.completed':
-        // Transcripción del usuario completada
-        if (data.transcript) {
-          this.addMessage(data.transcript, 'user', false);
-        }
-        break;
-        
-      case 'conversation.item.input_audio_transcription.partial':
-        // Transcripción parcial del usuario
-        if (data.transcript) {
-          this.onTranscriptReceived?.(data.transcript, true);
-        }
-        break;
-        
       case 'response.audio_transcript.delta':
         // Delta de transcripción de audio del asistente
         if (data.delta) {
@@ -407,30 +390,6 @@ export class OpenAIRealtimeService {
   }
 
   // Método para enviar transcripción del usuario
-  sendUserTranscription(transcript: string, isPartial: boolean = false) {
-    if (isPartial) {
-      // Solo mostrar transcripción parcial, no enviar aún
-      this.onTranscriptReceived?.(transcript, true);
-    } else {
-      // Enviar transcripción final
-      this.addMessage(transcript, 'user', false);
-      if (this.dc && this.dc.readyState === 'open') {
-        const userMessage = {
-          type: 'conversation.item.create',
-          item: {
-            type: 'message',
-            role: 'user',
-            content: [{
-              type: 'input_text',
-              text: transcript
-            }]
-          }
-        };
-        this.dc.send(JSON.stringify(userMessage));
-      }
-    }
-  }
-
   // Cleanup method
   cleanup() {
     this.stopConversation();
