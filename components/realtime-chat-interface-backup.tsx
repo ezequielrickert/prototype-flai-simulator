@@ -234,72 +234,48 @@ export function RealtimeChatInterface() {
                 )}
               </Button>
               
-              {/* Botón Mute/Unmute - Fijo entre inicio y parada */}
-              <Button
-                onClick={isConnected ? toggleMicrophone : undefined}
-                disabled={!isConnected}
-                variant="outline"
-                className={`button-microphone relative border-gold text-gold h-12 font-bold py-3 px-4 rounded-lg transition-all duration-200 min-w-[120px] ${
-                  !isConnected ? 'opacity-50 cursor-not-allowed' : ''
-                } ${isMicrophoneMuted ? 'bg-transparent button-microphone-muted' : 'bg-white button-microphone-active'}`}
-                size="lg"
-                title={
-                  !isConnected 
-                    ? 'Inicia una conversación para usar el micrófono' 
-                    : (isMicrophoneMuted ? 'Activar micrófono' : 'Silenciar micrófono')
-                }
-              >
-                <div className="flex items-center gap-2 justify-center">
-                  <span className="icon-gold">
-                    {isMicrophoneMuted ? '🔇' : '🎤'}
-                  </span>
-                  <span className="hidden sm:inline text-xs">
-                    {isMicrophoneMuted ? 'Muteado' : 'Activo'}
-                  </span>
-                </div>
-                {/* Audio level indicator when not muted */}
-                {!isMicrophoneMuted && microphoneAudioLevel > 0 && isConnected && (
-                  <div
-                    className="absolute bottom-1 left-2 h-1 bg-gold rounded-full transition-all duration-100 animate-pulse"
-                    style={{
-                      width: `${Math.min(microphoneAudioLevel * 80, 90)}%`,
-                      opacity: microphoneAudioLevel > 0.1 ? 1 : 0
-                    }}
-                  />
-                )}
-              </Button>
-              
-              {/* Microphone Restart Button - Only when disconnected and needed */}
-              {isConnected && !isListening && !speechRecognitionPaused && (
+              {/* Mute/Unmute Button - Only when connected */}
+              {isConnected && (
                 <Button
-                  onClick={restartSpeechRecognition}
+                  onClick={toggleMicrophone}
                   variant="outline"
-                  className="relative border-gold text-gold bg-beige h-12 font-bold py-3 rounded-lg transition-all duration-200 animate-pulse"
+                  className={`relative border-gold bg-beige text-gold h-12 font-bold py-3 px-6 rounded-lg transition-all duration-200 hover:bg-gold hover:text-cream hover:scale-105 hover:shadow-lg ${
+                    isMicrophoneMuted 
+                      ? 'opacity-60' 
+                      : ''
+                  }`}
                   size="lg"
                   title={isMicrophoneMuted ? 'Activar micrófono' : 'Silenciar micrófono'}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-[80px] justify-center">
                     {isMicrophoneMuted ? (
                       <>
-                        �
-                        <span className="hidden sm:inline">Silenciado</span>
+                        🔇
+                        <span className="hidden sm:inline font-semibold">Mute</span>
                       </>
                     ) : (
                       <>
                         🎤
-                        <span className="hidden sm:inline">Activo</span>
+                        <span className="hidden sm:inline font-semibold">Mic</span>
                       </>
                     )}
                   </div>
                   {/* Audio level indicator when not muted */}
                   {!isMicrophoneMuted && microphoneAudioLevel > 0 && (
                     <div
-                      className="absolute bottom-1 left-2 h-1 bg-green-500 rounded-full transition-all duration-100"
+                      className="absolute bottom-1 left-2 h-1 bg-gold rounded-full transition-all duration-100 animate-pulse"
                       style={{
-                        width: `${Math.min(microphoneAudioLevel * 80, 70)}%`,
-                        opacity: microphoneAudioLevel > 0.1 ? 1 : 0
+                        width: `${Math.min(microphoneAudioLevel * 70, 60)}%`,
+                        opacity: microphoneAudioLevel > 0.1 ? 0.8 : 0
                       }}
                     />
+                  )}
+                  {/* Muted overlay indicator */}
+                  {isMicrophoneMuted && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-dark bg-opacity-30 rounded-lg">
+                      <div className="w-6 h-0.5 bg-gold transform rotate-45 absolute"></div>
+                      <div className="w-6 h-0.5 bg-gold transform -rotate-45 absolute"></div>
+                    </div>
                   )}
                 </Button>
               )}
