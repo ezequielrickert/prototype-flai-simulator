@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { OpenAIRealtimeService, RealtimeMessage, RealtimeConversation, createRealtimeService } from '@/lib/realtime-chat-service';
+import { useMicrophoneControl } from './use-microphone-control';
 
 export const useRealtimeChat = () => {
   const [conversation, setConversation] = useState<RealtimeConversation | null>(null);
@@ -15,6 +16,9 @@ export const useRealtimeChat = () => {
   const serviceRef = useRef<OpenAIRealtimeService | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Initialize microphone control
+  const microphoneControl = useMicrophoneControl();
+
   // Initialize the service
   useEffect(() => {
     try {
@@ -26,6 +30,10 @@ export const useRealtimeChat = () => {
           setStatus(status);
           setStatusType(type || 'normal');
           setIsConnected(serviceRef.current?.getIsConnected() || false);
+        },
+        onMicrophoneStream: (stream: MediaStream | null) => {
+          // Pass the microphone stream to the microphone control hook
+          microphoneControl.setMicrophoneStream(stream);
         },
         onMessage: (message: RealtimeMessage) => {
           // Track AI state based on messages
@@ -174,6 +182,12 @@ export const useRealtimeChat = () => {
     stopConversation,
     sendTextMessage,
     getConnectionStatus,
-    setError
+    setError,
+    // Microphone controls
+    isMicrophoneMuted: microphoneControl.isMuted,
+    microphoneAudioLevel: microphoneControl.audioLevel,
+    toggleMicrophone: microphoneControl.toggleMute,
+    muteMicrophone: microphoneControl.muteMicrophone,
+    unmuteMicrophone: microphoneControl.unmuteMicrophone
   };
 };

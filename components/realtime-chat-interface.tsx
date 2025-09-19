@@ -19,7 +19,12 @@ export function RealtimeChatInterface() {
     startConversation,
     stopConversation,
     sendTextMessage,
-    setError
+    setError,
+    isMicrophoneMuted,
+    microphoneAudioLevel,
+    toggleMicrophone,
+    muteMicrophone,
+    unmuteMicrophone
   } = useRealtimeChat();
 
   const handleStartConversation = async () => {
@@ -67,7 +72,13 @@ export function RealtimeChatInterface() {
               {/* Activity Indicators */}
               {isConnected && (
                 <div className="flex items-center gap-2">
-                  {isUserSpeaking && (
+                  {isMicrophoneMuted && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
+                      <div className="w-2 h-2 bg-red-500 rounded-full" />
+                      <span className="text-xs text-red-700 font-medium">Muted</span>
+                    </div>
+                  )}
+                  {isUserSpeaking && !isMicrophoneMuted && (
                     <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                       <span className="text-xs text-blue-700 font-medium">You</span>
@@ -115,6 +126,36 @@ export function RealtimeChatInterface() {
                 </div>
               )}
             </Button>
+            
+            {/* Microphone Mute Button - Only show when connected */}
+            {isConnected && (
+              <Button
+                onClick={toggleMicrophone}
+                variant={isMicrophoneMuted ? "destructive" : "outline"}
+                className={`relative ${
+                  isMicrophoneMuted 
+                    ? "bg-red-600 hover:bg-red-700 text-white" 
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+                size="lg"
+              >
+                <div className="flex items-center gap-2">
+                  {isMicrophoneMuted ? "🔇" : "🎙️"}
+                  {isMicrophoneMuted ? "Muted" : "Live"}
+                </div>
+                {/* Audio level indicator */}
+                {!isMicrophoneMuted && microphoneAudioLevel > 0 && (
+                  <div 
+                    className="absolute bottom-1 left-2 h-1 bg-green-400 rounded-full transition-all duration-100"
+                    style={{ 
+                      width: `${Math.min(microphoneAudioLevel * 100, 80)}%`,
+                      opacity: microphoneAudioLevel > 0.1 ? 1 : 0
+                    }}
+                  />
+                )}
+              </Button>
+            )}
+            
             <Button
               onClick={handleStopConversation}
               disabled={isLoading || !isConnected}

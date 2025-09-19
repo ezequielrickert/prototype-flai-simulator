@@ -22,6 +22,7 @@ export class OpenAIRealtimeService {
   private onStatusChange?: (status: string, type?: string) => void;
   private onMessage?: (message: RealtimeMessage) => void;
   private onAudioReceived?: (stream: MediaStream) => void;
+  private onMicrophoneStream?: (stream: MediaStream | null) => void;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -31,10 +32,12 @@ export class OpenAIRealtimeService {
     onStatusChange?: (status: string, type?: string) => void;
     onMessage?: (message: RealtimeMessage) => void;
     onAudioReceived?: (stream: MediaStream) => void;
+    onMicrophoneStream?: (stream: MediaStream | null) => void;
   }) {
     this.onStatusChange = handlers.onStatusChange;
     this.onMessage = handlers.onMessage;
     this.onAudioReceived = handlers.onAudioReceived;
+    this.onMicrophoneStream = handlers.onMicrophoneStream;
   }
 
   private updateStatus(message: string, type: string = 'normal') {
@@ -80,6 +83,9 @@ export class OpenAIRealtimeService {
           autoGainControl: true
         }
       });
+
+      // Notify about microphone stream
+      this.onMicrophoneStream?.(this.currentStream);
 
       // Add microphone track to peer connection
       this.currentStream.getTracks().forEach(track => {
@@ -169,6 +175,8 @@ export class OpenAIRealtimeService {
       if (this.currentStream) {
         this.currentStream.getTracks().forEach(track => track.stop());
         this.currentStream = null;
+        // Notify about stream removal
+        this.onMicrophoneStream?.(null);
       }
 
       this.isConnected = false;
@@ -199,6 +207,8 @@ export class OpenAIRealtimeService {
     if (this.currentStream) {
       this.currentStream.getTracks().forEach(track => track.stop());
       this.currentStream = null;
+      // Notify about stream removal
+      this.onMicrophoneStream?.(null);
     }
   }
 
