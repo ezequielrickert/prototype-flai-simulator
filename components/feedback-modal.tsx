@@ -21,11 +21,11 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
     // Split by double line breaks or sections
     const sections = text.split(/\*\*([^*]+)\*\*/g);
     const formattedSections = [];
-    
+
     for (let i = 0; i < sections.length; i += 2) {
       const content = sections[i]?.trim();
       const title = sections[i + 1]?.trim();
-      
+
       if (content) {
         formattedSections.push({ type: 'content', text: content });
       }
@@ -33,13 +33,13 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
         formattedSections.push({ type: 'title', text: title });
       }
     }
-    
+
     return formattedSections;
   };
 
   const formattedSections = feedback ? formatFeedback(feedback) : [];
 
-  return (
+return (
     isOpen ? (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
         <Card className="card-custom max-w-3xl max-h-[90vh] w-full overflow-hidden shadow-xl">
@@ -50,8 +50,8 @@ export function FeedbackModal({ isOpen, feedback, onClose }: FeedbackModalProps)
             </CardTitle>
             <div className="separator" />
           </CardHeader>
-          <CardContent className="p-8 overflow-y-auto max-h-[calc(90vh-140px)] text-[var(--cream)]">
-            <div className="space-y-10">
+          <CardContent className="px-8 overflow-y-auto max-h-[calc(90vh-140px)] text-[var(--cream)]">
+            <div>
               {!feedback ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
