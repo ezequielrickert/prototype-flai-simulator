@@ -1,8 +1,9 @@
 'use client';
-// TO BE DELETED
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChatWindow } from "./chat-window";
 import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 import Link from "next/link";
 import {ArrowLeft, MessageCircle, Clock, Trophy} from "lucide-react";
@@ -18,9 +19,13 @@ export function RealtimeChatInterface() {
     isAIThinking,
     isAISpeaking,
     isUserSpeaking,
+    currentTranscript,
+    isListening,
+    speechRecognitionPaused,
     startConversation,
     stopConversation,
     sendTextMessage,
+    restartSpeechRecognition,
     setError,
     isMicrophoneMuted,
     microphoneAudioLevel,
