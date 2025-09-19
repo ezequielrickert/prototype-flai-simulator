@@ -125,41 +125,65 @@ export function RealtimeChatInterface() {
       </header>
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Área contextual del desafío */}
-        <Card className="card-custom border-0 shadow-lg mb-6">
-          <CardHeader className="pb-2">
+        <Card className="card-custom border-0 shadow-lg mb-6 transition-all duration-500">
+          {isConnected ? (
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
+                <span className="font-bold text-2xl text-gold">Desafío de Hoy: Conflictos de Interés</span>
+                {/* Indicador de progreso mejorado */}
+                <div className="items-center">
+                  <span className="chip border-gold text-gold">
+                    {`En progreso · ${formatTime(elapsedSeconds)} / 5:00`}
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+          ) : (
+            <>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
                   <span className="font-bold text-2xl text-gold">Desafío de Hoy: Conflictos de Interés</span>
                   {/* Indicador de progreso mejorado */}
                   <div className="items-center">
-                      <span className="chip border-gold text-gold">
-                        {isConnected ? `En progreso · ${formatTime(elapsedSeconds)} / 5:00` : 'Pendiente'}
-                      </span>
+                    <span className="chip border-gold text-gold">
+                      {isConnected ? `En progreso · ${formatTime(elapsedSeconds)} / 5:00` : 'Pendiente'}
+                    </span>
                   </div>
-            </div>
-            <div className="flex gap-6 mb-4">
-              <span className="flex items-center gap-2 text-sm text-cream">
-                <Clock className="w-5 h-5 icon-gold" />
-                Duración estimada: <span className="font-bold text-gold">5 minutos</span>
-              </span>
-              <span className="flex items-center gap-2 text-sm text-cream">
-                <Trophy className="w-5 h-5 icon-gold" />
-                XP a ganar: <span className="font-bold text-gold">+50 puntos</span>
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-6 text-base text-cream">Practica identificar y manejar situaciones donde tus intereses personales podrían entrar en conflicto con tus responsabilidades profesionales.</p>
-            <div className="mb-4">
-              <span className="font-semibold text-gold">Consejos para la conversación:</span>
-              <ul className="list-disc ml-6 mt-2 text-cream text-sm space-y-1">
-                <li>Habla con naturalidad</li>
-                <li>Describe situaciones reales que hayas vivido</li>
-                <li>Pregunta si tienes dudas sobre los escenarios</li>
-              </ul>
-            </div>
-          </CardContent>
+                </div>
+                <div className="flex gap-6 mb-4">
+                  <span className="flex items-center gap-2 text-sm text-cream">
+                    <Clock className="w-5 h-5 icon-gold" />
+                    Duración estimada: <span className="font-bold text-gold">5 minutos</span>
+                  </span>
+                  <span className="flex items-center gap-2 text-sm text-cream">
+                    <Trophy className="w-5 h-5 icon-gold" />
+                    XP a ganar: <span className="font-bold text-gold">+50 puntos</span>
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-6 text-base text-cream">Practica identificar y manejar situaciones donde tus intereses personales podrían entrar en conflicto con tus responsabilidades profesionales.</p>
+                <div className="mb-4">
+                  <span className="font-semibold text-gold">Consejos para la conversación:</span>
+                  <ul className="list-disc ml-6 mt-2 text-cream text-sm space-y-1">
+                    <li>Habla con naturalidad</li>
+                    <li>Describe situaciones reales que hayas vivido</li>
+                    <li>Pregunta si tienes dudas sobre los escenarios</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </>
+          )}
         </Card>
-        {/* Conversación guiada y controles */}
+          {/* Chat Window: mostrar si hay conversación y mensajes relevantes (no solo "Conversation ended") */}
+          {conversation &&
+              conversation.messages.filter(m => m.speaker !== 'system' || (m.text && !m.text.toLowerCase().includes('conversation ended'))).length > 0 && (
+                  <ChatWindow
+                      conversation={conversation}
+                  />
+              )}
+
+          {/* Conversación guiada y controles */}
         <Card className="card-custom border-0 shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
@@ -351,14 +375,6 @@ export function RealtimeChatInterface() {
             )}
           </CardContent>
         </Card>
-
-          {/* Chat Window: mostrar si hay conversación y mensajes relevantes (no solo "Conversation ended") */}
-          {conversation &&
-            conversation.messages.filter(m => m.speaker !== 'system' || (m.text && !m.text.toLowerCase().includes('conversation ended'))).length > 0 && (
-              <ChatWindow
-                conversation={conversation}
-              />
-          )}
 
         {/* Card de instrucciones: mostrar solo si no hay conversación, o está vacía, o solo tiene "Conversation ended" */}
         {(!conversation ||
