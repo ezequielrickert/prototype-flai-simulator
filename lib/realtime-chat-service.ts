@@ -6,6 +6,8 @@ export interface RealtimeMessage {
   speaker: 'user' | 'assistant' | 'system';
   timestamp: Date;
   audioUrl?: string;
+  isPartial?: boolean;
+  confidence?: number;
 }
 
 export interface RealtimeConversation {
@@ -25,6 +27,14 @@ export class OpenAIRealtimeService {
   private onMessage?: (message: RealtimeMessage) => void;
   private onAudioReceived?: (stream: MediaStream) => void;
   private onMicrophoneStream?: (stream: MediaStream | null) => void;
+  private onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
+  private onAISpeakingStateChange?: (isSpeaking: boolean) => void;
+  
+  // Para manejar deltas de conversación
+  private currentAssistantMessage: string = '';
+  private currentUserMessage: string = '';
+  private assistantMessageId: string | null = null;
+  private aiSpeakingTimeout: NodeJS.Timeout | null = null;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -35,18 +45,140 @@ export class OpenAIRealtimeService {
     onMessage?: (message: RealtimeMessage) => void;
     onAudioReceived?: (stream: MediaStream) => void;
     onMicrophoneStream?: (stream: MediaStream | null) => void;
+    onTranscriptReceived?: (transcript: string, isPartial: boolean) => void;
+    onAISpeakingStateChange?: (isSpeaking: boolean) => void;
   }) {
     this.onStatusChange = handlers.onStatusChange;
     this.onMessage = handlers.onMessage;
     this.onAudioReceived = handlers.onAudioReceived;
     this.onMicrophoneStream = handlers.onMicrophoneStream;
+    this.onTranscriptReceived = handlers.onTranscriptReceived;
+    this.onAISpeakingStateChange = handlers.onAISpeakingStateChange;
   }
 
   private updateStatus(message: string, type: string = 'normal') {
     this.onStatusChange?.(message, type);
   }
 
-  private addMessage(text: string, speaker: 'user' | 'assistant' | 'system' = 'system') {
+  private handleRealtimeEvent(data: any) {
+    console.log('Realtime event:', data);
+    
+    switch (data.type) {
+      case 'conversation.item.input_audio_transcription.completed':
+        // Transcripción del usuario completada
+        if (data.transcript) {
+          this.addMessage(data.transcript, 'user', false);
+        }
+        break;
+        
+      case 'conversation.item.input_audio_transcription.partial':
+        // Transcripción parcial del usuario
+        if (data.transcript) {
+          this.onTranscriptReceived?.(data.transcript, true);
+        }
+        break;
+        
+      case 'response.audio_transcript.delta':
+        // Delta de transcripción de audio del asistente
+        if (data.delta) {
+          this.currentAssistantMessage += data.delta;
+          this.updateAssistantMessage(this.currentAssistantMessage, true);
+          
+          // Notificar que la IA está hablando
+          this.onAISpeakingStateChange?.(true);
+          
+          // Resetear el timeout para cuando termine de hablar
+          if (this.aiSpeakingTimeout) {
+            clearTimeout(this.aiSpeakingTimeout);
+          }
+          this.aiSpeakingTimeout = setTimeout(() => {
+            this.onAISpeakingStateChange?.(false);
+          }, 2000); // 2 segundos sin deltas = IA terminó de hablar
+        }
+        break;
+        
+      case 'response.audio_transcript.done':
+        // Transcripción del asistente completada
+        if (this.currentAssistantMessage) {
+          this.updateAssistantMessage(this.currentAssistantMessage, false);
+          this.currentAssistantMessage = '';
+          this.assistantMessageId = null;
+        }
+        
+        // IA terminó de hablar definitivamente
+        if (this.aiSpeakingTimeout) {
+          clearTimeout(this.aiSpeakingTimeout);
+        }
+        setTimeout(() => {
+          console.log('AI terminó de hablar - enviando señal para reanudar speech recognition');
+          this.onAISpeakingStateChange?.(false);
+        }, 1000); // Esperar 1 segundo antes de reanudar
+        break;
+        
+      case 'response.text.delta':
+        // Delta de respuesta de texto del asistente
+        if (data.delta) {
+          this.currentAssistantMessage += data.delta;
+          this.updateAssistantMessage(this.currentAssistantMessage, true);
+        }
+        break;
+        
+      case 'response.text.done':
+        // Respuesta de texto del asistente completada
+        if (this.currentAssistantMessage) {
+          this.updateAssistantMessage(this.currentAssistantMessage, false);
+          this.currentAssistantMessage = '';
+          this.assistantMessageId = null;
+        }
+        break;
+        
+      case 'conversation.item.created':
+        // Nuevo item de conversación creado
+        if (data.item?.content) {
+          const content = Array.isArray(data.item.content) ? data.item.content[0] : data.item.content;
+          if (content?.transcript || content?.text) {
+            const text = content.transcript || content.text;
+            const speaker = data.item.role === 'user' ? 'user' : 'assistant';
+            this.addMessage(text, speaker, false);
+          }
+        }
+        break;
+        
+      case 'response.done':
+        // La respuesta completa de la IA ha terminado
+        console.log('Respuesta de IA completamente terminada');
+        if (this.aiSpeakingTimeout) {
+          clearTimeout(this.aiSpeakingTimeout);
+        }
+        setTimeout(() => {
+          console.log('Response done - enviando señal para reanudar speech recognition');
+          this.onAISpeakingStateChange?.(false);
+        }, 800);
+        break;
+        
+      default:
+        console.log('Unhandled realtime event:', data.type);
+        break;
+    }
+  }
+
+  private updateAssistantMessage(text: string, isPartial: boolean) {
+    if (!this.assistantMessageId) {
+      // Crear nuevo mensaje
+      this.assistantMessageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
+    const message: RealtimeMessage = {
+      id: this.assistantMessageId,
+      text,
+      speaker: 'assistant',
+      timestamp: new Date(),
+      isPartial
+    };
+    this.onMessage?.(message);
+  }
+
+  private addMessage(text: string, speaker: 'user' | 'assistant' | 'system' = 'system', isPartial: boolean = false, confidence?: number) {
     // Filter out technical debug messages for better UX
     const isDebugMessage = text.includes('Data channel') || 
                           text.includes('voice connected') || 
@@ -59,12 +191,18 @@ export class OpenAIRealtimeService {
       return;
     }
 
+    console.log(`Adding message - Speaker: ${speaker}, Text: "${text}", Partial: ${isPartial}`);
+
     const message: RealtimeMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       text,
       speaker,
-      timestamp: new Date()
+      timestamp: new Date(),
+      isPartial,
+      confidence
     };
+    
+    console.log('Calling onMessage with:', message);
     this.onMessage?.(message);
   }
 
@@ -119,8 +257,14 @@ export class OpenAIRealtimeService {
       };
 
       this.dc.onmessage = (event) => {
-        console.log('Assistant message:', event.data);
-        this.addMessage(event.data, 'assistant');
+        try {
+          const data = JSON.parse(event.data);
+          this.handleRealtimeEvent(data);
+        } catch (error) {
+          // Fallback para mensajes de texto simple
+          console.log('Assistant message:', event.data);
+          this.addMessage(event.data, 'assistant');
+        }
       };
 
       // Handle connection state changes
@@ -259,6 +403,31 @@ export class OpenAIRealtimeService {
   // Check if connected
   getIsConnected(): boolean {
     return this.isConnected;
+  }
+
+  // Método para enviar transcripción del usuario
+  sendUserTranscription(transcript: string, isPartial: boolean = false) {
+    if (isPartial) {
+      // Solo mostrar transcripción parcial, no enviar aún
+      this.onTranscriptReceived?.(transcript, true);
+    } else {
+      // Enviar transcripción final
+      this.addMessage(transcript, 'user', false);
+      if (this.dc && this.dc.readyState === 'open') {
+        const userMessage = {
+          type: 'conversation.item.create',
+          item: {
+            type: 'message',
+            role: 'user',
+            content: [{
+              type: 'input_text',
+              text: transcript
+            }]
+          }
+        };
+        this.dc.send(JSON.stringify(userMessage));
+      }
+    }
   }
 
   // Cleanup method
