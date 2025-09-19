@@ -37,15 +37,34 @@ export function RealtimeChatInterface() {
 
   // Estado para tiempo transcurrido
   const [elapsedSeconds, setElapsedSeconds] = React.useState(0);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
   React.useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
     if (isConnected) {
-      timer = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+      timerRef.current = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
     } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
       setElapsedSeconds(0);
     }
-    return () => { if (timer) clearInterval(timer); };
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [isConnected]);
+
+  // Detener el timer al detener la conversación
+  const handleStopConversation = async () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    await stopConversation();
+  };
 
   // Formateo de tiempo
   const formatTime = (secs: number) => {
@@ -57,10 +76,7 @@ export function RealtimeChatInterface() {
   const handleStartConversation = async () => {
     await startConversation();
   };
-
-  const handleStopConversation = async () => {
-    await stopConversation();
-  };
+  
 
   const getStatusClassName = (type: string) => {
     switch (type) {
