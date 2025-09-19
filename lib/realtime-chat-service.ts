@@ -156,7 +156,7 @@ export class OpenAIRealtimeService {
       // Set remote description with the answer from OpenAI
       const answerSdp = await response.text();
       const answer = {
-        
+
         type: 'answer' as RTCSdpType,
         sdp: answerSdp
       };
@@ -179,7 +179,6 @@ export class OpenAIRealtimeService {
         const finalFeedbackRequest = {
           "type": "response.create",
           "response": {
-            "conversation": "default",
             "instructions": "Por favor genera un resumen final de la retroalimentación sobre las decisiones éticas del usuario en esta sesión. Mantén el tono profesional y conciso, resaltando fortalezas y posibles áreas de mejora."
           }
         };
